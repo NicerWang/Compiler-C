@@ -2,8 +2,6 @@
 #define YYDEBUG 1
 #include "main.h"
 
-
-
 extern int yylex(void); 
 
 extern int yyparse(void); 
@@ -31,13 +29,12 @@ void dfs(Node* node, int depth);
 
 
 %token INT WHILE FOR IF ELSE MAIN
-%token IN OUT
 %token LT LE GT GE EQ NE
-%token OP_ASSIGN
+%token OP_ASSIGN RETURN
 %token SEMI COMMA LBS RBS LP RP LBT RBT
 %token OP_ADD OP_SUB OP_MUL OP_DIV OP_MOD 
-%token USUB NOT AND OR
-%token <node> ID NUMBER
+%token USUB NOT AND OR BIT_AND 
+%token <node> ID NUMBER STR
 
 
 %right OP_ASSIGN
@@ -57,7 +54,7 @@ void dfs(Node* node, int depth);
 %nonassoc UMINUS
 
 %type <nodes> translation_unit stmts declare_list call_list idlist 
-%type <node> entry_point func_declare while for if factor expr nullable_expr assign num id type declare output input call stmt compound_stmt
+%type <node> entry_point func_declare while for if factor expr nullable_expr assign num id string type declare call stmt compound_stmt
 %union{
 	Node* node;
 	vector<Node*>* nodes;
@@ -177,8 +174,13 @@ stmt: declare SEMI {$$ = $1;}
 | call SEMI {$$ = $1;}
 | compound_stmt {$$ = $1;}
 | expr SEMI {$$ = $1;}
-| input {$$ = $1;}
-| output {$$ = $1;}
+| RETURN expr SEMI
+{
+	$$ = new Node();
+	$$->type = STMT_t;
+	$$->subType = RET_t;
+	$$->children.push_back($2);
+}
 ;
 
 call: id LBS call_list RBS
@@ -198,22 +200,22 @@ call: id LBS call_list RBS
 }
 ;
 
-call_list: id COMMA call_list
+call_list: expr COMMA call_list
 {
 	$$ = $3;
 	$3->push_back($1);
 }
-| num COMMA call_list 
+| string COMMA call_list 
 {
 	$$ = $3;
 	$3->push_back($1);
 }
-| id
+| expr
 {
 	$$ = new vector<Node*>();
 	$$->push_back($1);
 }
-| num
+| string
 {
 	$$ = new vector<Node*>();
 	$$->push_back($1);
@@ -224,28 +226,13 @@ call_list: id COMMA call_list
 }
 ;
 
-input: IN id
-{
-	$$ = new Node();
-	$$->type = STMT_t;
-	$$->subType = IN_t;
-	$$->children.push_back($2);
-}
-;
-output: OUT id
-{
-	$$ = new Node();
-	$$->type = STMT_t;
-	$$->subType = OUT_t;
-	$$->children.push_back($2);
-}
-;
 
 declare: type idlist
 {
 	$$ = new Node();
 	$$->type = STMT_t;
 	$$->subType = DECLARE_t;
+	$$->children.push_back($1);
 	vector<Node*> arr = *$2;
 	for(int i = arr.size() - 1; i >= 0; i--){
 		$$->children.push_back(arr[i]);
@@ -253,7 +240,13 @@ declare: type idlist
 }
 ;
 
-type: INT
+type: INT OP_MUL
+{
+	$$ = new Node();
+	$$->type = TYPE_t;
+	$$->subType = INT_STAR_t;
+}
+| INT
 {
 	$$ = new Node();
 	$$->type = TYPE_t;
@@ -279,6 +272,14 @@ num: NUMBER
 
 }
 ;
+string: STR
+{
+	$$ = new Node();
+	$$->type = VAR_t;
+	$$->subType = STRING_t;
+	$$->strValue = $1->strValue;
+}
+;
 
 idlist:	id COMMA idlist
 {
@@ -300,9 +301,10 @@ idlist:	id COMMA idlist
 	$$ = new vector<Node*>();
 	$$->push_back($1);
 }
+| 
 ;
 
-assign: id OP_ASSIGN expr
+assign: expr OP_ASSIGN expr
 {
 	$$ = new Node();
 	$$->type = STMT_t;
@@ -537,12 +539,32 @@ expr: expr OP_ADD expr
 	$$->type = EXPR_t;
 	$$->children.push_back(sym);
 	$$->children.push_back($2);
-
+}
+| BIT_AND id
+{
+	Node* sym = new Node();
+	sym->type = OP_t;
+	sym->subType = OP_ADDRESS_t;
+	$$ = new Node();
+	$$->type = EXPR_t;
+	$$->children.push_back(sym);
+	$$->children.push_back($2);
+}
+| OP_MUL id
+{
+	Node* sym = new Node();
+	sym->type = OP_t;
+	sym->subType = OP_VALUE_t;
+	$$ = new Node();
+	$$->type = EXPR_t;
+	$$->children.push_back(sym);
+	$$->children.push_back($2);
 }
 ;
 
 factor: id {$$ = $1;}
 | num {$$ = $1;}
+| call {$$ = $1;}
 | LBS expr RBS {$$ = $2;}
 ;
 
@@ -629,7 +651,10 @@ void showNode(Node* node, int depth) {
 			cout << ">CALL" + node->strValue;
 			break;
 		}
-
+		case RET_t: {
+			cout << ">RET";
+			break;
+		}
 		}
 		cout<<endl;
 		break;
@@ -645,12 +670,24 @@ void showNode(Node* node, int depth) {
 			cout << "ID:" + node->strValue << endl;
 			break;
 		}
+		case STRING_t: {
+			cout << "String:" + node->strValue << endl;
+			break;
+		}
 		}
 		break;
 	}
 	case OP_t: {
 		cout << "Operator";
 		switch (node->subType) {
+		case OP_ADDRESS_t: {
+			cout << "> & " << endl;
+			break;
+		}	
+		case OP_VALUE_t: {
+			cout << "> * " << endl;
+			break;
+		}	
 		case OP_MM_t: {
 			cout << "> -- " << endl;
 			break;
@@ -738,6 +775,10 @@ void showNode(Node* node, int depth) {
 		{
 		case INT_t: {
 			cout << "Type: Int" << endl;
+			break;
+		}
+		case INT_STAR_t: {
+			cout << "Type: Int Pointer:" + node->strValue << endl;
 			break;
 		}
 		}

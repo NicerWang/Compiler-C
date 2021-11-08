@@ -27,6 +27,7 @@ id {letter}({letter}|{digit})*
 number {digit}
 inlineNote \/\/[^\n]*
 multiNote "/*"[^*]*[*]+([^*/][^*]*[*]+)*[*]*"/"
+string \".*\"
 
 %%
 "main"      return MAIN;
@@ -35,8 +36,7 @@ multiNote "/*"[^*]*[*]+([^*/][^*]*[*]+)*[*]*"/"
 "for"       return FOR;
 "if"        return IF;
 "else"      return ELSE;
-"in"        return IN;
-"out"       return OUT;
+"return"    return RETURN;
 
 "++"        return OP_PP;
 "--"        return OP_MM;
@@ -49,6 +49,7 @@ multiNote "/*"[^*]*[*]+([^*/][^*]*[*]+)*[*]*"/"
 "!"         return NOT;
 "&&"        return AND;
 "||"        return OR;
+"&"         return BIT_AND;
 
 "<"         return LT;
 "<="        return LE;
@@ -82,7 +83,11 @@ multiNote "/*"[^*]*[*]+([^*/][^*]*[*]+)*[*]*"/"
                 else yylval.node->intValue = t;
                 return ID;
             }
-
+{string}    {
+                yylval.node = new Node();
+                yylval.node->strValue = yytext;
+                return STR;
+            }
 %%
 
 int checkExist(string name){
