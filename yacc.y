@@ -100,6 +100,7 @@ func_declare: type id LBS declare_list RBS compound_stmt
 {
 	$$ = new Node();
 	$$->type = FUNC_t;
+	$$->subType = $1->subType;
 	$$->children.push_back($2);
 
 	Node* list_node = new Node();
@@ -118,6 +119,7 @@ declare_list: type id COMMA declare_list
 {
 	$$ = $4;
 	Node* newNode = new Node();
+	newNode->type = PARAM_t;
 	newNode->subType = SINGLE_t;
 	newNode->intValue = $1->subType;
 	newNode->strValue = $2->strValue;
@@ -126,12 +128,18 @@ declare_list: type id COMMA declare_list
 | type id
 {
 	Node* newNode = new Node();
+	newNode->type = PARAM_t;
 	newNode->subType = SINGLE_t;
 	newNode->intValue = $1->subType;
 	newNode->strValue = $2->strValue;
 	$$ = new vector<Node*>();
 	$$->push_back(newNode);
 }
+| 
+{
+	$$ = new vector<Node*>();
+}
+
 ;
 
 compound_stmt: LP stmts RP  
@@ -180,6 +188,8 @@ call: id LBS call_list RBS
 	$$->subType = CALL_t;
 	$$->children.push_back($1);
 	Node* newNode = new Node();
+	newNode->type = ARGU_t;
+	newNode->subType = TOTAL_t;
 	vector<Node*> arr = *$3;
 	for(int i = arr.size() - 1; i >=0; i--){
 		newNode->children.push_back(arr[i]);
@@ -207,6 +217,10 @@ call_list: id COMMA call_list
 {
 	$$ = new vector<Node*>();
 	$$->push_back($1);
+}
+| 
+{
+	$$ = new vector<Node*>();
 }
 ;
 
@@ -705,11 +719,11 @@ void showNode(Node* node, int depth) {
 		break;
 	}
 	case FUNC_t: {
-		cout << "Function";
+		cout << "Function" ;
 		switch (node->subType)
 		{
 		case INT_t: {
-			cout << "RetType: Int" << endl;
+			cout << "|Int" << endl;
 			break;
 		}
 		}
@@ -733,7 +747,7 @@ void showNode(Node* node, int depth) {
         switch (node->subType)
         {
             case SINGLE_t:{
-                cout<<node->strValue<<"|"<<node->intValue<<endl;
+				cout<<node->strValue<<endl;
                 break;
             }
             case TOTAL_t:{
@@ -749,7 +763,13 @@ void showNode(Node* node, int depth) {
         switch (node->subType)
         {
             case SINGLE_t:{
-                cout<<node->strValue<<endl;
+				cout<<node->strValue<<"|";
+				switch (node->intValue){
+					case INT_t:{
+						cout << "INT";
+					}
+				}
+				cout<<endl;
                 break;
             }
             case TOTAL_t:{
