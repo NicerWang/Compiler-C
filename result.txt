@@ -1,0 +1,194 @@
+->ROOT
+-->EntryPoint
+--->Statement
+---->Statement>DECLARE
+----->Statement>ASSIGN
+------>ID:m
+------>Expression
+------->Number:2
+---->Statement>DECLARE
+----->Statement>ASSIGN
+------>ID:i
+------>Expression
+------->Number:0
+---->Statement>DECLARE
+----->Statement>ASSIGN
+------>ID:factorial
+------>Expression
+------->Number:3
+---->Statement>DECLARE
+----->Statement>ASSIGN
+------>ID:result
+------>Expression
+------->Number:1
+---->Statement>WHILE
+----->Expression
+------>Expression
+------->ID:factorial
+------>Operator> > 
+------>Expression
+------->Number:0
+----->Statement
+------>Expression
+------->Statement>ASSIGN
+-------->ID:result
+-------->Expression
+--------->Expression
+---------->ID:result
+--------->Operator> * 
+--------->Expression
+---------->ID:factorial
+------>Expression
+------->Statement>ASSIGN
+-------->ID:factorial
+-------->Expression
+--------->Expression
+---------->ID:factorial
+--------->Operator> - 
+--------->Expression
+---------->Number:1
+---->Statement>FOR
+----->Expression
+------>Statement>DECLARE
+------->Statement>ASSIGN
+-------->ID:j
+-------->Expression
+--------->Number:0
+----->Expression
+------>Expression
+------->ID:j
+------>Operator> < 
+------>Expression
+------->Expression
+-------->Expression
+--------->ID:result
+-------->Operator> % 
+-------->Expression
+--------->Number:100
+------->Operator> - 
+------->Expression
+-------->Number:1
+----->Expression
+------>ID:j
+------>Operator> ++ 
+----->Statement
+------>Statement>FOR
+------->Expression
+-------->Statement>DECLARE
+--------->Statement>ASSIGN
+---------->ID:k
+---------->Expression
+----------->Expression
+------------>ID:j
+----------->Operator> + 
+----------->Expression
+------------>Number:1
+------->Expression
+-------->Expression
+--------->ID:k
+-------->Operator> < 
+-------->Expression
+--------->Expression
+---------->Expression
+----------->ID:result
+---------->Operator> % 
+---------->Expression
+----------->Number:100
+--------->Operator> - 
+--------->Expression
+---------->Number:1
+------->Expression
+-------->ID:k
+-------->Operator> ++ 
+------->Statement
+-------->Statement>IF
+--------->Expression
+---------->Expression
+----------->Expression
+------------>Expression
+------------->ID:k
+------------>Operator> - 
+------------>Expression
+------------->Number:5
+----------->Operator> == 
+----------->Expression
+------------>ID:j
+---------->Operator> || 
+---------->Expression
+----------->Expression
+------------>Expression
+------------->Expression
+-------------->Operator> ! 
+-------------->Expression
+--------------->ID:j
+------------->Operator> + 
+------------->Expression
+-------------->Number:2
+------------>Operator> == 
+------------>Expression
+------------->ID:k
+----------->Operator> && 
+----------->Expression
+------------>Expression
+------------->Expression
+-------------->ID:k
+------------->Operator> - 
+------------->Expression
+-------------->Number:3
+------------>Operator> == 
+------------>Expression
+------------->ID:j
+--------->Statement
+---------->Expression
+----------->Statement>ASSIGN
+------------>ID:i
+------------>Expression
+------------->Expression
+-------------->ID:k
+------------->Operator> % 
+------------->Expression
+-------------->Expression
+--------------->Expression
+---------------->ID:j
+--------------->Operator> + 
+--------------->Expression
+---------------->Number:1
+--------->Statement>IF
+---------->Expression
+----------->Expression
+------------>Expression
+------------->ID:k
+------------>Operator> == 
+------------>Expression
+------------->Expression
+-------------->ID:j
+------------->Operator> + 
+------------->Expression
+-------------->Number:3
+----------->Operator> && 
+----------->Expression
+------------>Expression
+------------->Expression
+-------------->ID:k
+------------->Operator> % 
+------------->Expression
+-------------->Number:2
+------------>Operator> == 
+------------>Expression
+------------->Number:0
+---------->Statement
+----------->Expression
+------------>Statement>ASSIGN
+------------->ID:i
+------------->Expression
+-------------->Expression
+--------------->ID:k
+-------------->Operator> / 
+-------------->Expression
+--------------->Expression
+---------------->Expression
+----------------->ID:j
+---------------->Operator> + 
+---------------->Expression
+----------------->Number:1
+---------->Statement
