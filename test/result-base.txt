@@ -1,0 +1,516 @@
+====== GRAMMER TREE ======
+->ROOT
+-->Function|Int
+--->ID:printf
+--->Parameters: 
+--->Statement>COMPOUND
+---->Statement>DECLARE
+----->Type: Int
+----->Statement>ASSIGN
+------>ID:n
+------>Expression
+------->Number:5
+-->Function|Int
+--->ID:scanf
+--->Parameters: 
+--->Statement
+-->EntryPoint
+--->Statement>COMPOUND
+---->Statement>DECLARE
+----->Type: Int
+----->Statement>ASSIGN
+------>ID:m
+------>Expression
+------->Number:2
+---->Statement>DECLARE
+----->Type: Int
+----->Statement>ASSIGN
+------>ID:n
+------>Expression
+------->Number:3
+---->Statement>CALL
+----->ID:scanf
+----->Arguments: 
+------>String:"%d"
+------>Expression
+------->Operator> & 
+------->ID:m
+---->Statement>CALL
+----->ID:printf
+----->Arguments: 
+------>String:"%d\n"
+------>Expression
+------->Expression
+-------->Expression
+--------->Expression
+---------->ID:m
+--------->Operator> + 
+--------->Expression
+---------->Number:100
+------->Operator> % 
+------->Expression
+-------->Number:2
+---->Statement>DECLARE
+----->Type: Int
+----->Statement>ASSIGN
+------>ID:i
+------>Expression
+------->Number:0
+---->Statement>DECLARE
+----->Type: Int
+----->Statement>ASSIGN
+------>ID:factorial
+------>Expression
+------->Number:3
+---->Statement>DECLARE
+----->Type: Int
+----->Statement>ASSIGN
+------>ID:result
+------>Expression
+------->Number:1
+---->Statement>WHILE
+----->Expression
+------>Expression
+------->ID:factorial
+------>Operator> > 
+------>Expression
+------->Number:0
+----->Statement>COMPOUND
+------>Statement>ASSIGN
+------->ID:result
+------->Expression
+-------->Expression
+--------->ID:result
+-------->Operator> * 
+-------->Expression
+--------->ID:factorial
+------>Statement>ASSIGN
+------->ID:factorial
+------->Expression
+-------->Expression
+--------->ID:factorial
+-------->Operator> - 
+-------->Expression
+--------->Number:1
+---->Statement>CALL
+----->ID:printf
+----->Arguments: 
+------>String:"%d\n"
+------>Expression
+------->Expression
+-------->ID:result
+------->Operator> % 
+------->Expression
+-------->Number:100
+---->Statement>FOR
+----->Expression
+------>Statement>DECLARE
+------->Type: Int
+------->Statement>ASSIGN
+-------->ID:j
+-------->Expression
+--------->Number:0
+----->Expression
+------>Expression
+------->ID:j
+------>Operator> < 
+------>Expression
+------->Expression
+-------->Expression
+--------->ID:result
+-------->Operator> % 
+-------->Expression
+--------->Number:100
+------->Operator> - 
+------->Expression
+-------->Number:1
+----->Expression
+------>ID:j
+------>Operator> ++ 
+----->Statement>COMPOUND
+------>Statement>FOR
+------->Expression
+-------->Statement>DECLARE
+--------->Type: Int
+--------->Statement>ASSIGN
+---------->ID:k
+---------->Expression
+----------->Expression
+------------>ID:j
+----------->Operator> + 
+----------->Expression
+------------>Number:1
+------->Expression
+-------->Expression
+--------->ID:k
+-------->Operator> < 
+-------->Expression
+--------->Expression
+---------->Expression
+----------->ID:result
+---------->Operator> % 
+---------->Expression
+----------->Number:100
+--------->Operator> - 
+--------->Expression
+---------->Number:1
+------->Expression
+-------->ID:k
+-------->Operator> ++ 
+------->Statement>COMPOUND
+-------->Statement>IF
+--------->Expression
+---------->Expression
+----------->Expression
+------------>Expression
+------------->ID:k
+------------>Operator> - 
+------------>Expression
+------------->Number:5
+----------->Operator> == 
+----------->Expression
+------------>ID:j
+---------->Operator> || 
+---------->Expression
+----------->Expression
+------------>Expression
+------------->Expression
+-------------->Operator> ! 
+-------------->Expression
+--------------->ID:j
+------------->Operator> + 
+------------->Expression
+-------------->Number:2
+------------>Operator> == 
+------------>Expression
+------------->ID:k
+----------->Operator> && 
+----------->Expression
+------------>Expression
+------------->Expression
+-------------->ID:k
+------------->Operator> - 
+------------->Expression
+-------------->Number:3
+------------>Operator> == 
+------------>Expression
+------------->ID:j
+--------->Statement>COMPOUND
+---------->Statement>DECLARE
+----------->Type: Int
+----------->Statement>ASSIGN
+------------>ID:i
+------------>Expression
+------------->Number:0
+---------->Statement>ASSIGN
+----------->ID:i
+----------->Expression
+------------>Expression
+------------->ID:k
+------------>Operator> % 
+------------>Expression
+------------->Expression
+-------------->Expression
+--------------->ID:j
+-------------->Operator> + 
+-------------->Expression
+--------------->Number:1
+---------->Statement>CALL
+----------->ID:printf
+----------->Arguments: 
+------------>String:"1: %d\n"
+------------>Expression
+------------->ID:i
+--------->Statement>IF
+---------->Expression
+----------->Expression
+------------>Expression
+------------->ID:k
+------------>Operator> == 
+------------>Expression
+------------->Expression
+-------------->ID:j
+------------->Operator> + 
+------------->Expression
+-------------->Number:3
+----------->Operator> && 
+----------->Expression
+------------>Expression
+------------->Expression
+-------------->ID:k
+------------->Operator> % 
+------------->Expression
+-------------->Number:2
+------------>Operator> == 
+------------>Expression
+------------->Number:0
+---------->Statement>COMPOUND
+----------->Statement>ASSIGN
+------------>ID:i
+------------>Expression
+------------->Expression
+-------------->ID:k
+------------->Operator> / 
+------------->Expression
+-------------->Expression
+--------------->Expression
+---------------->ID:j
+--------------->Operator> + 
+--------------->Expression
+---------------->Number:1
+----------->Statement>CALL
+------------>ID:printf
+------------>Arguments: 
+------------->String:"2: %d\n"
+------------->Expression
+-------------->ID:i
+---------->Statement>COMPOUND
+----------->Statement>CALL
+------------>ID:printf
+------------>Arguments: 
+------------->String:"3: %d\n"
+------------->Expression
+-------------->ID:i
+---->Statement>RET
+----->Expression
+------>Number:0
+====== LEX RESULT ======
+INT
+ID printf 4871711968
+LBS
+RBS
+LP
+INT
+ID n 4871711184
+OP_ASSIGN
+NUMBER 5
+SEMI
+RP
+INT
+ID scanf 4871712528
+LBS
+RBS
+LP
+RP
+INT
+MAIN
+LBS
+RBS
+LP
+INT
+ID m 4871713072
+OP_ASSIGN
+NUMBER 2
+SEMI
+INT
+ID n 4871713728
+OP_ASSIGN
+NUMBER 3
+SEMI
+ID scanf 4871712528
+LBS
+COMMA
+BIT_AND
+ID m 4871713072
+RBS
+SEMI
+ID printf 4871711968
+LBS
+COMMA
+LBS
+ID m 4871713072
+OP_ADD
+NUMBER 100
+RBS
+OP_MOD
+NUMBER 2
+RBS
+SEMI
+INT
+ID i 4871717344
+OP_ASSIGN
+NUMBER 0
+SEMI
+INT
+ID factorial 4871718080
+OP_ASSIGN
+NUMBER 3
+SEMI
+INT
+ID result 4871719248
+OP_ASSIGN
+NUMBER 1
+SEMI
+WHILE
+LBS
+ID factorial 4871718080
+GT
+NUMBER 0
+RBS
+LP
+ID result 4871719248
+OP_ASSIGN
+ID result 4871719248
+OP_MUL
+ID factorial 4871718080
+SEMI
+ID factorial 4871718080
+OP_ASSIGN
+ID factorial 4871718080
+OP_SUB
+NUMBER 1
+SEMI
+RP
+ID printf 4871711968
+LBS
+COMMA
+ID result 4871719248
+OP_MOD
+NUMBER 100
+RBS
+SEMI
+FOR
+LBS
+INT
+ID j 4871724064
+OP_ASSIGN
+NUMBER 0
+SEMI
+ID j 4871724064
+LT
+ID result 4871719248
+OP_MOD
+NUMBER 100
+OP_SUB
+NUMBER 1
+SEMI
+ID j 4871724064
+OP_PP
+RBS
+LP
+FOR
+LBS
+INT
+ID k 4871718800
+OP_ASSIGN
+ID j 4871724064
+OP_ADD
+NUMBER 1
+SEMI
+ID k 4871718800
+LT
+ID result 4871719248
+OP_MOD
+NUMBER 100
+OP_SUB
+NUMBER 1
+SEMI
+ID k 4871718800
+OP_PP
+RBS
+LP
+IF
+LBS
+ID k 4871718800
+OP_SUB
+NUMBER 5
+EQ
+ID j 4871724064
+OR
+NOT
+ID j 4871724064
+OP_ADD
+NUMBER 2
+EQ
+ID k 4871718800
+AND
+ID k 4871718800
+OP_SUB
+NUMBER 3
+EQ
+ID j 4871724064
+RBS
+LP
+INT
+ID i 4871733296
+OP_ASSIGN
+NUMBER 0
+SEMI
+ID i 4871733296
+OP_ASSIGN
+ID k 4871718800
+OP_MOD
+LBS
+ID j 4871724064
+OP_ADD
+NUMBER 1
+RBS
+SEMI
+ID printf 4871711968
+LBS
+COMMA
+ID i 4871733296
+RBS
+SEMI
+RP
+ELSE
+IF
+LBS
+ID k 4871718800
+EQ
+ID j 4871724064
+OP_ADD
+NUMBER 3
+AND
+ID k 4871718800
+OP_MOD
+NUMBER 2
+EQ
+NUMBER 0
+RBS
+LP
+ID i 4871717344
+OP_ASSIGN
+ID k 4871718800
+OP_DIV
+LBS
+ID j 4871724064
+OP_ADD
+NUMBER 1
+RBS
+SEMI
+ID printf 4871711968
+LBS
+COMMA
+ID i 4871717344
+RBS
+SEMI
+RP
+ELSE
+LP
+ID printf 4871711968
+LBS
+COMMA
+ID i 4871717344
+RBS
+SEMI
+RP
+RP
+RP
+RETURN
+NUMBER 0
+SEMI
+RP
+====== SYMBOL TABLE ======
+n     4871711184
+i     4871733296
+k     4871718800
+j     4871724064
+result     4871719248
+factorial     4871718080
+i     4871717344
+n     4871713728
+m     4871713072
+====== FUNCTIONS ======
+printf     4871711968
+scanf     4871712528

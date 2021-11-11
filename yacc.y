@@ -4,7 +4,15 @@
 
 extern int yylex(void); 
 
+vector<Node*> symbolTable;
+vector<Node*> availNodes;
+vector<Node*> funcNodes;
+int availNodesCnt = 0;
+
 extern int yyparse(void); 
+
+string lexRes = "";
+
 
 int yywrap()
 {
@@ -25,6 +33,7 @@ Node* root;
 void showNode(Node* node, int depth);
 void showTree(Node* node);
 void dfs(Node* node, int depth);
+int a = 1;
 %}
 
 
@@ -54,7 +63,7 @@ void dfs(Node* node, int depth);
 %nonassoc UMINUS
 
 %type <nodes> translation_unit stmts declare_list call_list idlist 
-%type <node> entry_point func_declare while for if factor expr nullable_expr assign num id string type declare call stmt compound_stmt
+%type <node> entry_point func_declare while for if factor expr nullable_expr assign num id string type declare call stmt compound_stmt left_val
 %union{
 	Node* node;
 	vector<Node*>* nodes;
@@ -108,10 +117,10 @@ func_declare: type id LBS declare_list RBS compound_stmt
 		list_node->children.push_back(arr[i]);
 	}
 	$$->children.push_back(list_node);
-
 	$$->children.push_back($6);
 }
 ;
+
 declare_list: type id COMMA declare_list
 {
 	$$ = $4;
@@ -136,17 +145,20 @@ declare_list: type id COMMA declare_list
 {
 	$$ = new vector<Node*>();
 }
-
 ;
 
 compound_stmt: LP stmts RP  
 {
 	$$ = new Node();
 	$$->type = STMT_t;
+	$$->subType = COMPOUND_t;
 	vector<Node*> arr = *$2;
 	for(int i = arr.size() - 1; i >= 0; i--){
 		$$->children.push_back(arr[i]);
 	}
+	// while(lexRes.find(id->strValue + " ~") != -1){
+	// 	lexRes = lexRes.replace(lexRes.find(id->strValue + " ~") + id->strValue.length(), 1 , to_string((long long)id));
+	// }
 }
 | LP RP 
 {
@@ -168,6 +180,7 @@ stmts: stmt
 ;
 
 stmt: declare SEMI {$$ = $1;}
+| assign SEMI {$$ = $1;}
 | if {$$ = $1;}
 | for {$$ = $1;}
 | while {$$ = $1;}
@@ -269,7 +282,6 @@ num: NUMBER
 	$$->type = VAR_t;
 	$$->subType = NUMBER_t;
 	$$->intValue = $1->intValue;
-
 }
 ;
 string: STR
@@ -304,7 +316,15 @@ idlist:	id COMMA idlist
 | 
 ;
 
-assign: expr OP_ASSIGN expr
+assign: id OP_ASSIGN expr
+{
+	$$ = new Node();
+	$$->type = STMT_t;
+	$$->subType = ASSIGN_t;
+	$$->children.push_back($1);
+	$$->children.push_back($3);
+}
+| left_val OP_ASSIGN expr
 {
 	$$ = new Node();
 	$$->type = STMT_t;
@@ -313,6 +333,27 @@ assign: expr OP_ASSIGN expr
 	$$->children.push_back($3);
 }
 ;
+left_val: BIT_AND id
+{
+	Node* sym = new Node();
+	sym->type = OP_t;
+	sym->subType = OP_ADDRESS_t;
+	$$ = new Node();
+	$$->type = EXPR_t;
+	$$->children.push_back(sym);
+	$$->children.push_back($2);
+}
+| OP_MUL id
+{
+	Node* sym = new Node();
+	sym->type = OP_t;
+	sym->subType = OP_VALUE_t;
+	$$ = new Node();
+	$$->type = EXPR_t;
+	$$->children.push_back(sym);
+	$$->children.push_back($2);
+}
+
 
 nullable_expr:expr {$$ = $1;}
 | {$$ = new Node();}
@@ -611,48 +652,78 @@ while: WHILE LBS expr RBS stmt
 
 
 %%
+void showTable(){
+	cout<<"====== SYMBOL TABLE ======"<<endl;
+	for(int i = 0; i < symbolTable.size(); i++){
+		if(symbolTable[i]->subType == INT_t) cout<<"INT ";
+		if(symbolTable[i]->subType == INT_STAR_t) cout<<"INT*";
+		cout<<symbolTable[i]->strValue<<"     "<<(long long)symbolTable[i]<<endl;
+	}
+	cout<<"====== FUNCTIONS ======"<<endl;
+	for(int i = 0; i < funcNodes.size(); i++){
+		cout<<funcNodes[i]->children[0]->strValue<<"     "<<(long long)funcNodes[i]<<endl;
+	}
 
+}
 
 void showTree(Node* node) {
+
+	cout<<"====== GRAMMER TREE ======"<<endl;
 	dfs(root, 1);
+	cout<<"====== LEX RESULT ======"<<endl;
+	cout<<lexRes;
+	showTable();
 }
+
 void showNode(Node* node, int depth) {
 	for (int i = 0; i < depth; i++) cout<<"-";
 	cout << ">";
 	switch (node->type) {
     case ROOT_t: {
-        cout << "ROOT" << endl;
+        cout << "ROOT"  << endl;
         break;
     }
 	case STMT_t: {
 		cout << "Statement";
 		switch (node->subType) {
 		case IF_t: {
-			cout << ">IF";
+			cout << ">IF" ;
 			break;
 		}
 		case FOR_t: {
-			cout << ">FOR";
+			cout << ">FOR" ;
 			break;
 		}
 		case WHILE_t: {
-			cout << ">WHILE";
+			cout << ">WHILE" ;
 			break;
 		}
 		case ASSIGN_t: {
-			cout << ">ASSIGN";
+			cout << ">ASSIGN" ;
 			break;
 		}
 		case DECLARE_t: {
-			cout << ">DECLARE";
+			for(int i = 1; i < node->children.size(); i++){
+				availNodesCnt++;
+				if(node->children[i]->subType == ASSIGN_t)
+					availNodes.push_back(node->children[i]->children[0]);	
+				else
+					availNodes.push_back(node->children[i]);	
+			}
+
+			cout << ">DECLARE" ;
 			break;
 		}
 		case CALL_t: {
-			cout << ">CALL" + node->strValue;
+			cout << ">CALL" + node->strValue ;
 			break;
 		}
 		case RET_t: {
-			cout << ">RET";
+			cout << ">RET" ;
+			break;
+		}
+		case COMPOUND_t: {
+			cout << ">COMPOUND" ;
 			break;
 		}
 		}
@@ -663,15 +734,21 @@ void showNode(Node* node, int depth) {
 	case VAR_t: {
 		switch (node->subType) {
 		case NUMBER_t: {
-			cout << "Number:" << node->intValue << endl;
+			cout << "Number:" << node->intValue  << endl;
 			break;
 		}
 		case ID_t: {
-			cout << "ID:" + node->strValue << endl;
+			cout << "ID:" + node->strValue  << endl;
+			for(int i = availNodesCnt - 1; i >= 0; i--){
+				if(availNodes[i]->strValue == node->strValue){
+					lexRes = lexRes.replace(lexRes.find(node->strValue + " ~") + node->strValue.length() + 1, 1 , to_string((long long)availNodes[i]));
+					break;
+				}
+			}	
 			break;
 		}
 		case STRING_t: {
-			cout << "String:" + node->strValue << endl;
+			cout << "String:" + node->strValue  << endl;
 			break;
 		}
 		}
@@ -681,75 +758,75 @@ void showNode(Node* node, int depth) {
 		cout << "Operator";
 		switch (node->subType) {
 		case OP_ADDRESS_t: {
-			cout << "> & " << endl;
+			cout << "> & "  << endl;
 			break;
 		}	
 		case OP_VALUE_t: {
-			cout << "> * " << endl;
+			cout << "> * "  << endl;
 			break;
 		}	
 		case OP_MM_t: {
-			cout << "> -- " << endl;
+			cout << "> -- "  << endl;
 			break;
 		}
 		case OP_PP_t: {
-			cout << "> ++ " << endl;
+			cout << "> ++ "  << endl;
 			break;
 		}
 		case OP_ADD_t: {
-			cout << "> + " << endl;
+			cout << "> + "  << endl;
 			break;
 		}
 		case OP_SUB_t: {
-			cout << "> - " << endl;
+			cout << "> - "  << endl;
 			break;
 		}
 		case OR_t: {
-			cout << "> || " << endl;
+			cout << "> || "  << endl;
 			break;
 		}
 		case AND_t: {
-			cout << "> && " << endl;
+			cout << "> && "  << endl;
 			break;
 		}
 		case NOT_t: {
-			cout << "> ! " << endl;
+			cout << "> ! "  << endl;
 			break;
 		}
 		case OP_MUL_t: {
-			cout << "> * " << endl;
+			cout << "> * "  << endl;
 			break;
 		}
 		case OP_DIV_t: {
-			cout << "> / " << endl;
+			cout << "> / "  << endl;
 			break;
 		}
 		case OP_MOD_t: {
-			cout << "> % " << endl;
+			cout << "> % "  << endl;
 			break;
 		}
 		case LT_t: {
-			cout << "> < " << endl;
+			cout << "> < "  << endl;
 			break;
 		}
 		case LE_t: {
-			cout << "> <= " << endl;
+			cout << "> <= "  << endl;
 			break;
 		}
 		case GT_t: {
-			cout << "> > " << endl;
+			cout << "> > "  << endl;
 			break;
 		}
 		case GE_t: {
-			cout << "> >= " << endl;
+			cout << "> >= "  << endl;
 			break;
 		}
 		case EQ_t: {
-			cout << "> == " << endl;
+			cout << "> == "  << endl;
 			break;
 		}
 		case NE_t: {
-			cout << "> != " << endl;
+			cout << "> != "  << endl;
 			break;
 		}
 		}
@@ -760,25 +837,34 @@ void showNode(Node* node, int depth) {
 		switch (node->subType)
 		{
 		case INT_t: {
-			cout << "|Int" << endl;
+			cout << "|Int"  << endl;
 			break;
 		}
+		}
+		funcNodes.push_back(node);
+		while(lexRes.find(node->children[0]->strValue + " ~") != -1){
+			lexRes = lexRes.replace(lexRes.find(node->children[0]->strValue + " ~") + node->children[0]->strValue.length() + 1, 1 , to_string((long long)node));
+		}
+		for(int i = 0; i < node->children[1]->children.size(); i++){
+			availNodesCnt++;
+			availNodes.push_back(node->children[1]->children[i]);	
+			lexRes = lexRes.replace(lexRes.find(node->children[1]->children[i]->strValue + " ~") + node->children[1]->children[i]->strValue.length() + 1, 1 , to_string((long long)node->children[1]->children[i]));
 		}
 		break;
 	}
 	case MAIN_t: {
-		cout << "EntryPoint" << endl;
+		cout << "EntryPoint"  << endl;
 		break;
 	}
 	case TYPE_t: {
 		switch (node->subType)
 		{
 		case INT_t: {
-			cout << "Type: Int" << endl;
+			cout << "Type: Int"  << endl;
 			break;
 		}
 		case INT_STAR_t: {
-			cout << "Type: Int Pointer:" + node->strValue << endl;
+			cout << "Type: Int Pointer:" + node->strValue  << endl;
 			break;
 		}
 		}
@@ -788,7 +874,7 @@ void showNode(Node* node, int depth) {
         switch (node->subType)
         {
             case SINGLE_t:{
-				cout<<node->strValue<<endl;
+				cout<<node->strValue <<endl;
                 break;
             }
             case TOTAL_t:{
@@ -807,21 +893,21 @@ void showNode(Node* node, int depth) {
 				cout<<node->strValue<<"|";
 				switch (node->intValue){
 					case INT_t:{
-						cout << "INT";
+						cout << "INT" ;
 					}
 				}
 				cout<<endl;
                 break;
             }
             case TOTAL_t:{
-                cout << "Parameters: "<< endl;
+                cout << "Parameters: "  << endl;
                 break;      
             }
         }
         break;
 	}
 	case EXPR_t: {
-		cout << "Expression" << endl;
+		cout << "Expression"  << endl;
 		break;
 	}
 	default :{
@@ -832,8 +918,19 @@ void showNode(Node* node, int depth) {
 }
 
 void dfs(Node* node, int depth) {
+	int blockVarCntNow = availNodesCnt;
 	showNode(node, depth);
-	for (int i = 0; i < node->children.size(); i++)
+	for (int i = 0; i < node->children.size(); i++){
 		dfs(node->children[i], depth + 1);
+	}
+	if( (node->type == STMT_t && (node->subType == FOR_t || node->subType == COMPOUND_t)) || node->type == FUNC_t)
+		while(availNodesCnt > blockVarCntNow){
+			symbolTable.push_back(availNodes[availNodesCnt - 1]);
+			availNodes.pop_back();
+			availNodesCnt--;
+	}
+
 }
+
+
 

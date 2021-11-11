@@ -1,0 +1,65 @@
+====== GRAMMER TREE ======
+->ROOT
+-->Function|Int
+--->ID:do_it
+--->Parameters: 
+---->n|INT
+--->Statement>COMPOUND
+---->Statement>RET
+----->Expression
+------>Expression
+------->ID:n
+------>Operator> % 
+------>Expression
+------->Number:2
+-->EntryPoint
+--->Statement>COMPOUND
+---->Statement>CALL
+----->ID:printf
+----->Arguments: 
+------>String:"%d"
+------>Expression
+------->Statement>CALL
+-------->ID:do_it
+-------->Arguments: 
+--------->Expression
+---------->Number:5
+---->Statement>RET
+----->Expression
+------>Number:0
+====== LEX RESULT ======
+INT
+ID do_it 5442137712
+LBS
+INT
+ID n 5442136576
+RBS
+LP
+RETURN
+ID n 5442136576
+OP_MOD
+NUMBER 2
+SEMI
+RP
+INT
+MAIN
+LBS
+RBS
+LP
+ID printf ~
+LBS
+COMMA
+ID do_it 5442137712
+LBS
+NUMBER 5
+RBS
+RBS
+SEMI
+RETURN
+NUMBER 0
+SEMI
+RP
+====== SYMBOL TABLE ======
+n     5442136576
+====== FUNCTIONS ======
+do_it     5442137712

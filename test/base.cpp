@@ -1,10 +1,16 @@
 // #include<stdio.h>  // not required
+int printf(){
+    int n = 5;
+}
+int scanf(){}
 
 int main() {
     int m = 2;
+    int n = 3;
     // handle IO
-     scanf("%d", &m);
-     printf("%d\n", (m+100) % 2);
+    // 1 \n
+    scanf("%d", &m);
+    printf("%d\n", (m+100) % 2);
 
     int i = 0;
     int factorial = 3;
@@ -21,6 +27,7 @@ int main() {
             printf("Hello ~: %d", j);
             */
             if (k - 5 == j || ! j + 2 == k && k - 3 == j) {
+                int i = 0;
                 i = k % (j + 1);
                 printf("1: %d\n", i);
             } else if (k == j + 3 && k % 2 == 0) {
@@ -55,3 +62,4 @@ int main() {
 3: 2
 
 */
+

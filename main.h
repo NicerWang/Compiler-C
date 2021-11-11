@@ -13,6 +13,7 @@ enum SubType{
 	WHILE_t,
 	ASSIGN_t,
 	DECLARE_t,
+	COMPOUND_t,
 	CALL_t,
 	RET_t,
 	OP_ADDRESS_t,
@@ -60,6 +61,7 @@ public:
 	vector<Node*> children;
 	int intValue;
 	string strValue;
+	int depth;
 	Node(){};
 };
 

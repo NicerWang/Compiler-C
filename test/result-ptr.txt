@@ -1,0 +1,143 @@
+====== GRAMMER TREE ======
+->ROOT
+-->EntryPoint
+--->Statement>COMPOUND
+---->Statement>DECLARE
+----->Type: Int
+----->Statement>ASSIGN
+------>ID:a
+------>Expression
+------->Number:2
+---->Statement>DECLARE
+----->Type: Int
+----->Statement>ASSIGN
+------>ID:b
+------>Expression
+------->Number:3
+---->Statement>CALL
+----->ID:printf
+----->Arguments: 
+------>String:"%d, %d\n"
+------>Expression
+------->ID:a
+------>Expression
+------->ID:b
+---->Statement>DECLARE
+----->Type: Int Pointer:
+----->Statement>ASSIGN
+------>ID:pa
+------>Expression
+------->Operator> & 
+------->ID:a
+---->Statement>DECLARE
+----->Type: Int Pointer:
+----->Statement>ASSIGN
+------>ID:pb
+------>Expression
+------->Operator> & 
+------->ID:b
+---->Statement>DECLARE
+----->Type: Int
+----->Statement>ASSIGN
+------>ID:t
+------>Expression
+------->Operator> * 
+------->ID:pb
+---->Statement>ASSIGN
+----->Expression
+------>Operator> * 
+------>ID:pb
+----->Expression
+------>Operator> * 
+------>ID:pa
+---->Statement>ASSIGN
+----->Expression
+------>Operator> * 
+------>ID:pa
+----->Expression
+------>ID:t
+---->Statement>CALL
+----->ID:printf
+----->Arguments: 
+------>String:"%d, %d\n"
+------>Expression
+------->ID:a
+------>Expression
+------->ID:b
+---->Statement>RET
+----->Expression
+------>Number:0
+====== LEX RESULT ======
+INT
+MAIN
+LBS
+RBS
+LP
+INT
+ID a 5668628672
+OP_ASSIGN
+NUMBER 2
+SEMI
+INT
+ID b 5668629488
+OP_ASSIGN
+NUMBER 3
+SEMI
+ID printf ~
+LBS
+COMMA
+ID a 5668628672
+COMMA
+ID b 5668629488
+RBS
+SEMI
+INT
+OP_MUL
+ID pa 5668631472
+OP_ASSIGN
+BIT_AND
+ID a 5668628672
+SEMI
+INT
+OP_MUL
+ID pb 5668632624
+OP_ASSIGN
+BIT_AND
+ID b 5668629488
+SEMI
+INT
+ID t 5668633264
+OP_ASSIGN
+OP_MUL
+ID pb 5668632624
+SEMI
+OP_MUL
+ID pb 5668632624
+OP_ASSIGN
+OP_MUL
+ID pa 5668631472
+SEMI
+OP_MUL
+ID pa 5668631472
+OP_ASSIGN
+ID t 5668633264
+SEMI
+ID printf ~
+LBS
+COMMA
+ID a 5668628672
+COMMA
+ID b 5668629488
+RBS
+SEMI
+RETURN
+NUMBER 0
+SEMI
+RP
+====== SYMBOL TABLE ======
+t     5668633264
+pb     5668632624
+pa     5668631472
+b     5668629488
+a     5668628672
+====== FUNCTIONS ======
