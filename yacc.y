@@ -13,7 +13,6 @@ extern int yyparse(void);
 
 string lexRes = "";
 
-
 int yywrap()
 {
 	return 1;
@@ -29,11 +28,13 @@ int main()
 	yyparse();
 	return 0;
 }
+
 Node* root;
 void showNode(Node* node, int depth);
 void showTree(Node* node);
 void dfs(Node* node, int depth);
-int a = 1;
+void addChildren(Node* node,vector<Node*>* nodes);
+Node* formNode(NodeType type,SubType subType = NONE_t);
 %}
 
 
@@ -72,12 +73,8 @@ int a = 1;
 %%
 root: translation_unit 
 {
-	root = new Node();
-	root->type = ROOT_t;
-	vector<Node*> arr = *$1;
-	for(int i = arr.size() - 1; i >= 0; i--){
-		root->children.push_back(arr[i]);
-	}
+	root = formNode(ROOT_t);
+	addChildren(root,$1);
 	showTree(root);
 }
 ;
@@ -96,26 +93,18 @@ translation_unit: entry_point
 
 entry_point: INT MAIN LBS RBS compound_stmt
 {
-	$$ = new Node();
-	$$->type = MAIN_t;
+	$$ = formNode(MAIN_t);
 	$$->children.push_back($5);
 }
 ;
 
 func_declare: type id LBS declare_list RBS compound_stmt
 {
-	$$ = new Node();
-	$$->type = FUNC_t;
-	$$->subType = $1->subType;
+	$$ = formNode(FUNC_t,$1->subType);
 	$$->children.push_back($2);
 
-	Node* list_node = new Node();
-	list_node->type = PARAM_t;
-	list_node->subType = TOTAL_t;
-	vector<Node*> arr = *$4;
-	for(int i = arr.size() - 1; i >= 0; i--){
-		list_node->children.push_back(arr[i]);
-	}
+	Node* list_node = formNode(PARAM_t,TOTAL_t);
+	addChildren(list_node,$4);
 	$$->children.push_back(list_node);
 	$$->children.push_back($6);
 }
@@ -124,18 +113,14 @@ func_declare: type id LBS declare_list RBS compound_stmt
 declare_list: type id COMMA declare_list
 {
 	$$ = $4;
-	Node* newNode = new Node();
-	newNode->type = PARAM_t;
-	newNode->subType = SINGLE_t;
+	Node* newNode = formNode(PARAM_t,SINGLE_t);
 	newNode->intValue = $1->subType;
 	newNode->strValue = $2->strValue;
 	$$->push_back(newNode);
 }
 | type id
 {
-	Node* newNode = new Node();
-	newNode->type = PARAM_t;
-	newNode->subType = SINGLE_t;
+	Node* newNode = formNode(PARAM_t,SINGLE_t);
 	newNode->intValue = $1->subType;
 	newNode->strValue = $2->strValue;
 	$$ = new vector<Node*>();
@@ -149,16 +134,8 @@ declare_list: type id COMMA declare_list
 
 compound_stmt: LP stmts RP  
 {
-	$$ = new Node();
-	$$->type = STMT_t;
-	$$->subType = COMPOUND_t;
-	vector<Node*> arr = *$2;
-	for(int i = arr.size() - 1; i >= 0; i--){
-		$$->children.push_back(arr[i]);
-	}
-	// while(lexRes.find(id->strValue + " ~") != -1){
-	// 	lexRes = lexRes.replace(lexRes.find(id->strValue + " ~") + id->strValue.length(), 1 , to_string((long long)id));
-	// }
+	$$ = formNode(STMT_t,COMPOUND_t);
+	addChildren($$,$2);
 }
 | LP RP 
 {
@@ -189,26 +166,17 @@ stmt: declare SEMI {$$ = $1;}
 | expr SEMI {$$ = $1;}
 | RETURN expr SEMI
 {
-	$$ = new Node();
-	$$->type = STMT_t;
-	$$->subType = RET_t;
+	$$ = formNode(STMT_t,RET_t);
 	$$->children.push_back($2);
 }
 ;
 
 call: id LBS call_list RBS
 {
-	$$ = new Node();
-	$$->type = STMT_t;
-	$$->subType = CALL_t;
+	$$ = formNode(STMT_t,CALL_t);
 	$$->children.push_back($1);
-	Node* newNode = new Node();
-	newNode->type = ARGU_t;
-	newNode->subType = TOTAL_t;
-	vector<Node*> arr = *$3;
-	for(int i = arr.size() - 1; i >=0; i--){
-		newNode->children.push_back(arr[i]);
-	}
+	Node* newNode = formNode(ARGU_t,TOTAL_t);
+	addChildren(newNode,$3);
 	$$->children.push_back(newNode);
 }
 ;
@@ -242,53 +210,38 @@ call_list: expr COMMA call_list
 
 declare: type idlist
 {
-	$$ = new Node();
-	$$->type = STMT_t;
-	$$->subType = DECLARE_t;
+	$$ = formNode(STMT_t,DECLARE_t);
 	$$->children.push_back($1);
-	vector<Node*> arr = *$2;
-	for(int i = arr.size() - 1; i >= 0; i--){
-		$$->children.push_back(arr[i]);
-	}
+	addChildren($$,$2);
 }
 ;
 
 type: INT OP_MUL
 {
-	$$ = new Node();
-	$$->type = TYPE_t;
-	$$->subType = INT_STAR_t;
+	$$ = formNode(TYPE_t,INT_STAR_t);
 }
 | INT
 {
-	$$ = new Node();
-	$$->type = TYPE_t;
-	$$->subType = INT_t;
+	$$ = formNode(TYPE_t,INT_t);
 }
 ;
 
 id: ID
 {
-	$$ = new Node();
-	$$->type = VAR_t;
-	$$->subType = ID_t;
+	$$ = formNode(VAR_t,ID_t);
 	$$->strValue = $1->strValue;
 }
 ;
 
 num: NUMBER
 {
-	$$ = new Node();
-	$$->type = VAR_t;
-	$$->subType = NUMBER_t;
+	$$ = formNode(VAR_t,NUMBER_t);	
 	$$->intValue = $1->intValue;
 }
 ;
 string: STR
 {
-	$$ = new Node();
-	$$->type = VAR_t;
-	$$->subType = STRING_t;
+	$$ = formNode(VAR_t,STRING_t);
 	$$->strValue = $1->strValue;
 }
 ;
@@ -316,42 +269,31 @@ idlist:	id COMMA idlist
 | 
 ;
 
-assign: id OP_ASSIGN expr
+assign: left_val OP_ASSIGN expr
 {
-	$$ = new Node();
-	$$->type = STMT_t;
-	$$->subType = ASSIGN_t;
-	$$->children.push_back($1);
-	$$->children.push_back($3);
-}
-| left_val OP_ASSIGN expr
-{
-	$$ = new Node();
-	$$->type = STMT_t;
-	$$->subType = ASSIGN_t;
+	$$ = formNode(STMT_t,ASSIGN_t);
 	$$->children.push_back($1);
 	$$->children.push_back($3);
 }
 ;
+
 left_val: BIT_AND id
 {
-	Node* sym = new Node();
-	sym->type = OP_t;
-	sym->subType = OP_ADDRESS_t;
-	$$ = new Node();
-	$$->type = EXPR_t;
+	Node* sym = formNode(OP_t,OP_ADDRESS_t);
+	$$ = formNode(VAR_t);
 	$$->children.push_back(sym);
 	$$->children.push_back($2);
 }
 | OP_MUL id
 {
-	Node* sym = new Node();
-	sym->type = OP_t;
-	sym->subType = OP_VALUE_t;
-	$$ = new Node();
-	$$->type = EXPR_t;
+	Node* sym = formNode(OP_t,OP_VALUE_t);
+	$$ = formNode(VAR_t);
 	$$->children.push_back(sym);
 	$$->children.push_back($2);
+}
+| id
+{
+	$$ = $1;
 }
 
 
@@ -361,243 +303,176 @@ nullable_expr:expr {$$ = $1;}
 
 expr: expr OP_ADD expr
 {
-	Node* sym = new Node();
-	sym->type = OP_t;
-	sym->subType = OP_ADD_t;
-	$$ = new Node();
-	$$->type = EXPR_t;
+	Node* sym = formNode(OP_t,OP_ADD_t);
+	$$ = formNode(EXPR_t);
 	$$->children.push_back($1);
 	$$->children.push_back(sym);
 	$$->children.push_back($3);
 }
 | expr OP_SUB expr
 {
-	Node* sym = new Node();
-	sym->type = OP_t;
-	sym->subType = OP_SUB_t;
-	$$ = new Node();
-	$$->type = EXPR_t;
+	Node* sym = formNode(OP_t,OP_SUB_t);
+	$$ = formNode(EXPR_t);
 	$$->children.push_back($1);
 	$$->children.push_back(sym);
 	$$->children.push_back($3);
 }
 | expr OP_MUL expr
 {
-	Node* sym = new Node();
-	sym->type = OP_t;
-	sym->subType = OP_MUL_t;
-	$$ = new Node();
-	$$->type = EXPR_t;
+	Node* sym = formNode(OP_t,OP_MUL_t);
+	$$ = formNode(EXPR_t);
 	$$->children.push_back($1);
 	$$->children.push_back(sym);
 	$$->children.push_back($3);
 }
 | expr OP_DIV expr
 {
-	Node* sym = new Node();
-	sym->type = OP_t;
-	sym->subType = OP_DIV_t;
-	$$ = new Node();
-	$$->type = EXPR_t;
+	Node* sym = formNode(OP_t,OP_DIV_t);
+	$$ = formNode(EXPR_t);
 	$$->children.push_back($1);
 	$$->children.push_back(sym);
 	$$->children.push_back($3);
 }
 | expr OP_MOD expr
 {
-	Node* sym = new Node();
-	sym->type = OP_t;
-	sym->subType = OP_MOD_t;
-	$$ = new Node();
-	$$->type = EXPR_t;
+	Node* sym = formNode(OP_t,OP_MOD_t);
+	$$ = formNode(EXPR_t);
 	$$->children.push_back($1);
 	$$->children.push_back(sym);
 	$$->children.push_back($3);
 }
 | OP_SUB expr %prec USUB
 {
-	Node* sym = new Node();
-	sym->type = OP_t;
-	sym->subType = OP_SUB_t;
-	$$ = new Node();
-	$$->type = EXPR_t;
+	Node* sym = formNode(OP_t,OP_SUB_t);
+	$$ = formNode(EXPR_t);
 	$$->children.push_back(sym);
 	$$->children.push_back($2);
 }
 | expr EQ expr
 {
-	Node* sym = new Node();
-	sym->type = OP_t;
-	sym->subType = EQ_t;
-	$$ = new Node();
-	$$->type = EXPR_t;
+	Node* sym = formNode(OP_t,EQ_t);
+	$$ = formNode(EXPR_t);
 	$$->children.push_back($1);
 	$$->children.push_back(sym);
 	$$->children.push_back($3);
 }
 | expr GT expr
 {
-	Node* sym = new Node();
-	sym->type = OP_t;
-	sym->subType = GT_t;
-	$$ = new Node();
-	$$->type = EXPR_t;
+	Node* sym = formNode(OP_t,GT_t);
+	$$ = formNode(EXPR_t);
 	$$->children.push_back($1);
 	$$->children.push_back(sym);
 	$$->children.push_back($3);
 }
 | expr LT expr
 {
-	Node* sym = new Node();
-	sym->type = OP_t;
-	sym->subType = LT_t;
-	$$ = new Node();
-	$$->type = EXPR_t;
+	Node* sym = formNode(OP_t,LT_t);
+	$$ = formNode(EXPR_t);
 	$$->children.push_back($1);
 	$$->children.push_back(sym);
 	$$->children.push_back($3);
 }
 | expr GE expr
 {
-	Node* sym = new Node();
-	sym->type = OP_t;
-	sym->subType = GE_t;
-	$$ = new Node();
-	$$->type = EXPR_t;
+	Node* sym = formNode(OP_t,GE_t);
+	$$ = formNode(EXPR_t);
 	$$->children.push_back($1);
 	$$->children.push_back(sym);
 	$$->children.push_back($3);
 }
 | expr LE expr
 {
-	Node* sym = new Node();
-	sym->type = OP_t;
-	sym->subType = LE_t;
-	$$ = new Node();
-	$$->type = EXPR_t;
+	Node* sym = formNode(OP_t,LE_t);
+	$$ = formNode(EXPR_t);
 	$$->children.push_back($1);
 	$$->children.push_back(sym);
 	$$->children.push_back($3);
 }
 | expr NE expr
 {
-	Node* sym = new Node();
-	sym->type = OP_t;
-	sym->subType = NE_t;
-	$$ = new Node();
-	$$->type = EXPR_t;
+	Node* sym = formNode(OP_t,NE_t);
+	$$ = formNode(EXPR_t);
 	$$->children.push_back($1);
 	$$->children.push_back(sym);
 	$$->children.push_back($3);
 }
 | expr AND expr
 {
-	Node* sym = new Node();
-	sym->type = OP_t;
-	sym->subType = AND_t;
-	$$ = new Node();
-	$$->type = EXPR_t;
+	Node* sym = formNode(OP_t,AND_t);
+	$$ = formNode(EXPR_t);
 	$$->children.push_back($1);
 	$$->children.push_back(sym);
 	$$->children.push_back($3);
 }
 | expr OR expr
 {
-	Node* sym = new Node();
-	sym->type = OP_t;
-	sym->subType = OR_t;
-	$$ = new Node();
-	$$->type = EXPR_t;
+	Node* sym = formNode(OP_t,OR_t);
+	$$ = formNode(EXPR_t);
 	$$->children.push_back($1);
 	$$->children.push_back(sym);
 	$$->children.push_back($3);
 }
 | NOT expr
 {
-	Node* sym = new Node();
-	sym->type = OP_t;
-	sym->subType = NOT_t;
-	$$ = new Node();
-	$$->type = EXPR_t;
+	Node* sym = formNode(OP_t,NOT_t);
+	$$ = formNode(EXPR_t);
 	$$->children.push_back(sym);
 	$$->children.push_back($2);
 }
 | factor 
 {
-	$$ = new Node();
-	$$->type = EXPR_t;
+	$$ = formNode(EXPR_t);
 	$$->children.push_back($1);
 }
 | assign
 {
-	$$ = new Node();
-	$$->type = EXPR_t;
+	$$ = formNode(EXPR_t);
 	$$->children.push_back($1);
 }
 | declare
 {
-	$$ = new Node();
-	$$->type = EXPR_t;
+	$$ = formNode(EXPR_t);
 	$$->children.push_back($1);
 }
 | id OP_PP
 {
-	Node* sym = new Node();
-	sym->type = OP_t;
-	sym->subType = OP_PP_t;
-	$$ = new Node();
-	$$->type = EXPR_t;
+	Node* sym = formNode(OP_t,OP_PP_t);
+	$$ = formNode(EXPR_t);
 	$$->children.push_back($1);
 	$$->children.push_back(sym);
 }
 | OP_PP id
 {
-	Node* sym = new Node();
-	sym->type = OP_t;
-	sym->subType = OP_PP_t;
-	$$ = new Node();
-	$$->type = EXPR_t;
+	Node* sym = formNode(OP_t,OP_PP_t);
+	$$ = formNode(EXPR_t);
 	$$->children.push_back(sym);
 	$$->children.push_back($2);
-
 }
 | id OP_MM
 {
-	Node* sym = new Node();
-	sym->type = OP_t;
-	sym->subType = OP_MM_t;
-	$$ = new Node();
-	$$->type = EXPR_t;
+	Node* sym = formNode(OP_t,OP_MM_t);
+	$$ = formNode(EXPR_t);
 	$$->children.push_back($1);
 	$$->children.push_back(sym);
 }
 | OP_MM id
 {
-	Node* sym = new Node();
-	sym->type = OP_t;
-	sym->subType = OP_MM_t;
-	$$ = new Node();
-	$$->type = EXPR_t;
+	Node* sym = formNode(OP_t,OP_MM_t);
+	$$ = formNode(EXPR_t);
 	$$->children.push_back(sym);
 	$$->children.push_back($2);
 }
 | BIT_AND id
 {
-	Node* sym = new Node();
-	sym->type = OP_t;
-	sym->subType = OP_ADDRESS_t;
-	$$ = new Node();
-	$$->type = EXPR_t;
+	Node* sym = formNode(OP_t,OP_ADDRESS_t);
+	$$ = formNode(EXPR_t);
 	$$->children.push_back(sym);
 	$$->children.push_back($2);
 }
 | OP_MUL id
 {
-	Node* sym = new Node();
-	sym->type = OP_t;
-	sym->subType = OP_VALUE_t;
-	$$ = new Node();
-	$$->type = EXPR_t;
+	Node* sym = formNode(OP_t,OP_VALUE_t);
+	$$ = formNode(EXPR_t);
 	$$->children.push_back(sym);
 	$$->children.push_back($2);
 }
@@ -611,17 +486,13 @@ factor: id {$$ = $1;}
 
 if: IF LBS expr RBS stmt
 {
-	$$ = new Node();
-	$$->type = STMT_t;
-	$$->subType = IF_t;
+	$$ = formNode(STMT_t,IF_t);
 	$$->children.push_back($3);
 	$$->children.push_back($5);
 }
 | IF LBS expr RBS stmt ELSE stmt
 {
-	$$ = new Node();
-	$$->type = STMT_t;
-	$$->subType = IF_t;
+	$$ = formNode(STMT_t,IF_t);
 	$$->children.push_back($3);
 	$$->children.push_back($5);
 	$$->children.push_back($7);
@@ -630,9 +501,7 @@ if: IF LBS expr RBS stmt
 
 for: FOR LBS nullable_expr SEMI nullable_expr SEMI nullable_expr RBS stmt
 {
-	$$ = new Node();
-	$$->type = STMT_t;
-	$$->subType = FOR_t;
+	$$ = formNode(STMT_t,FOR_t);
 	$$->children.push_back($3);
 	$$->children.push_back($5);
 	$$->children.push_back($7);
@@ -642,9 +511,7 @@ for: FOR LBS nullable_expr SEMI nullable_expr SEMI nullable_expr RBS stmt
 
 while: WHILE LBS expr RBS stmt
 {
-	$$ = new Node();
-	$$->type = STMT_t;
-	$$->subType = WHILE_t;
+	$$ = formNode(STMT_t,WHILE_t);
 	$$->children.push_back($3);
 	$$->children.push_back($5);
 }
@@ -931,6 +798,16 @@ void dfs(Node* node, int depth) {
 	}
 
 }
+Node* formNode(NodeType type,SubType subType){
+	Node* newNode = new Node();
+	newNode->type = type;
+	newNode->subType = subType;
+	return newNode;
+}
 
-
-
+void addChildren(Node* node,vector<Node*>* nodes){
+	vector<Node*> arr = *nodes;
+	for(int i = arr.size() - 1; i >= 0; i--){
+		node->children.push_back(arr[i]);
+	}
+}

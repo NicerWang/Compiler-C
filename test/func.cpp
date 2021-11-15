@@ -1,4 +1,4 @@
-int do_it(int n) {
+int* do_it(int n) {
     return n % 2;
 }
 
