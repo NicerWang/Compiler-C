@@ -1,3 +1,4 @@
+
 #include <iostream>
 #include <string>
 #include <vector>
@@ -54,6 +55,19 @@ enum NodeType
     EXPR_t,
 };
 
+enum SymType{
+	SYM_INT_t,
+	SYM_INT_STAR_t,
+	SYM_FUNC_t,
+};
+
+class Symbol {
+public:
+	string id;
+	SymType type;
+	int value;
+};
+
 class Node {
 public:
 	NodeType type;
@@ -61,11 +75,5 @@ public:
 	vector<Node*> children;
 	int intValue;
 	string strValue;
-	int depth;
-	Node(){};
 };
-
-
-
-
 

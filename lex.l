@@ -1,14 +1,11 @@
 %option noyywrap
 %{
-#include "main.h"
+#include "structure.h" 
 
 #include "y.tab.h"
 
-extern vector<Node*> symbolTable;
 extern string lexRes;
 
-int checkExist(string name);
-int installID(string name);
 
 %}
 
@@ -85,16 +82,3 @@ string \".*\"
                 return STR;
             }
 %%
-
-// int checkExist(string name){
-//     for(int i = 0; i < symbolTable.size(); i++){
-//         if(symbolTable[i]->name == name){
-//             return i;
-//         }
-//     }
-//     return -1;
-// }
-// int installID(string name){
-//     symbolTable.push_back(new Var(name,symbolTable.size()));
-//     return symbolTable.size() - 1;
-// }
