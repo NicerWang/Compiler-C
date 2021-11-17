@@ -1,9 +1,9 @@
-
 #include <iostream>
 #include <string>
 #include <vector>
 using namespace std;
-enum SubType{
+enum SubType
+{
 	INT_t,
 	INT_STAR_t,
 	NUMBER_t,
@@ -36,9 +36,9 @@ enum SubType{
 	AND_t,
 	OR_t,
 	NOT_t,
-    SINGLE_t,
-    TOTAL_t,
-    NONE_t
+	SINGLE_t,
+	TOTAL_t,
+	NONE_t
 };
 
 enum NodeType
@@ -52,28 +52,34 @@ enum NodeType
 	ARGU_t,
 	PARAM_t,
 	ROOT_t,
-    EXPR_t,
+	EXPR_t,
 };
 
-enum SymType{
+enum SymType
+{
 	SYM_INT_t,
 	SYM_INT_STAR_t,
 	SYM_FUNC_t,
 };
 
-class Symbol {
+class Symbol
+{
 public:
 	string id;
 	SymType type;
 	int value;
 };
 
-class Node {
+class Node
+{
 public:
 	NodeType type;
-	SubType subType = NONE_t;
-	vector<Node*> children;
+	SubType subType;
+	vector<Node *> children;
 	int intValue;
 	string strValue;
+	Node()
+	{
+		this->subType = NONE_t;
+	}
 };
-

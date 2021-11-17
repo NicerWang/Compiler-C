@@ -52,10 +52,9 @@ int main()
 %right USUB
 %right NOT
 
-%nonassoc UMINUS
 
 %type <nodes> translation_unit stmts declare_list call_list idlist 
-%type <node> entry_point func_declare while for if factor expr nullable_expr assign num id string type declare call stmt compound_stmt left_val
+%type <node> entry_point func_declare while for if factor expr nullable_expr assign assign_id assign_lv num id string type declare call stmt compound_stmt left_val
 %union{
 	Node* node;
 	vector<Node*>* nodes;
@@ -154,7 +153,6 @@ stmt: declare SEMI {$$ = $1;}
 | while {$$ = $1;}
 | call SEMI {$$ = $1;}
 | compound_stmt {$$ = $1;}
-| expr SEMI {$$ = $1;}
 | RETURN expr SEMI
 {
 	$$ = formNode(STMT_t,RET_t);
@@ -242,7 +240,7 @@ idlist:	id COMMA idlist
 	$$ = $3;
 	$3->push_back($1);
 }
-| assign COMMA idlist
+| assign_id COMMA idlist
 {
 	$$ = $3;
 	$3->push_back($1);
@@ -252,15 +250,31 @@ idlist:	id COMMA idlist
 	$$ = new vector<Node*>();
 	$$->push_back($1);
 }
-| assign 
+| assign_id 
 {
 	$$ = new vector<Node*>();
 	$$->push_back($1);
 }
-| 
 ;
 
-assign: left_val OP_ASSIGN expr
+assign:assign_lv
+{
+	$$ = $1;
+}
+| assign_id
+{
+	$$ = $1;
+};
+
+assign_lv: left_val OP_ASSIGN expr
+{
+	$$ = formNode(STMT_t,ASSIGN_t);
+	$$->children.push_back($1);
+	$$->children.push_back($3);
+}
+;
+
+assign_id: id OP_ASSIGN expr
 {
 	$$ = formNode(STMT_t,ASSIGN_t);
 	$$->children.push_back($1);
@@ -281,10 +295,6 @@ left_val: BIT_AND id
 	$$ = formNode(VAR_t);
 	$$->children.push_back(sym);
 	$$->children.push_back($2);
-}
-| id
-{
-	$$ = $1;
 }
 
 

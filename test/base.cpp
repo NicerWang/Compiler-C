@@ -1,39 +1,49 @@
-// #include<stdio.h>  // not required
-int printf(){
+
+int printf()
+{
     int n = 5;
 }
-int scanf(){}
+int scanf() {}
 
-int main() {
+int main()
+{
     int m = 2;
     int n = 3;
     // handle IO
     // 1 \n
     scanf("%d", &m);
-    printf("%d\n", (m+100) % 2);
+    printf("%d\n", (m + 100) % 2);
 
     int i = 0;
     int factorial = 3;
     int result = 1;
-    while (factorial > 0) {  // factorial
+    while (factorial > 0)
+    { // factorial
         result = result * factorial;
         factorial = factorial - 1;
     }
     printf("%d\n", result % 100);
 
-    for (int j = 0; j < result % 100 - 1; j++) {
-        for (int k = j + 1; k < result % 100 - 1; k++) {
+    for (int j = 0; j < result % 100 - 1; j++)
+    {
+        for (int k = j + 1; k < result % 100 - 1; k++)
+        {
             /*
             printf("Hello ~: %d", j);
             */
-            if (k - 5 == j || ! j + 2 == k && k - 3 == j) {
+            if (k - 5 == j || !j + 2 == k && k - 3 == j)
+            {
                 int i = 0;
                 i = k % (j + 1);
                 printf("1: %d\n", i);
-            } else if (k == j + 3 && k % 2 == 0) {
+            }
+            else if (k == j + 3 && k % 2 == 0)
+            {
                 i = k / (j + 1);
                 printf("2: %d\n", i);
-            } else {
+            }
+            else
+            {
                 printf("3: %d\n", i);
                 /*
                 printf("Aha~ %d", j);
@@ -43,7 +53,6 @@ int main() {
     }
     return 0;
 }
-
 
 /*
 
@@ -62,4 +71,3 @@ int main() {
 3: 2
 
 */
-
