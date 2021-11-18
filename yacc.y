@@ -23,11 +23,7 @@ int main()
 	yyparse();
 	return 0;
 }
-
-
-
 %}
-
 
 %token INT WHILE FOR IF ELSE MAIN
 %token LT LE GT GE EQ NE
@@ -54,7 +50,7 @@ int main()
 
 
 %type <nodes> translation_unit stmts declare_list call_list idlist 
-%type <node> entry_point func_declare while for if factor expr nullable_expr assign assign_id assign_lv num id string type declare call stmt compound_stmt left_val
+%type <node> entry_point func_declare while for if factor expr assign assign_id assign_lv num id string type declare call stmt no_semi_stmt compound_stmt left_val
 %union{
 	Node* node;
 	vector<Node*>* nodes;
@@ -146,18 +142,21 @@ stmts: stmt
 }
 ;
 
-stmt: declare SEMI {$$ = $1;}
-| assign SEMI {$$ = $1;}
+stmt: no_semi_stmt SEMI {$$ = $1;}
 | if {$$ = $1;}
 | for {$$ = $1;}
 | while {$$ = $1;}
-| call SEMI {$$ = $1;}
 | compound_stmt {$$ = $1;}
 | RETURN expr SEMI
 {
 	$$ = formNode(STMT_t,RET_t);
 	$$->children.push_back($2);
 }
+;
+
+no_semi_stmt: assign {$$ = $1;}
+| declare {$$ = $1;}
+| expr {$$ = $1;}
 ;
 
 call: id LBS call_list RBS
@@ -282,24 +281,13 @@ assign_id: id OP_ASSIGN expr
 }
 ;
 
-left_val: BIT_AND id
+left_val: OP_MUL id
 {
-	Node* sym = formNode(OP_t,OP_ADDRESS_t);
-	$$ = formNode(VAR_t);
+	Node* sym = formNode(OP_t,OP_MUL_t);
+	$$ = formNode(VAR_t,LEFT_VALUE_t);
 	$$->children.push_back(sym);
 	$$->children.push_back($2);
 }
-| OP_MUL id
-{
-	Node* sym = formNode(OP_t,OP_VALUE_t);
-	$$ = formNode(VAR_t);
-	$$->children.push_back(sym);
-	$$->children.push_back($2);
-}
-
-
-nullable_expr:expr {$$ = $1;}
-| {$$ = new Node();}
 ;
 
 expr: expr OP_ADD expr
@@ -422,18 +410,9 @@ expr: expr OP_ADD expr
 }
 | factor 
 {
-	$$ = formNode(EXPR_t);
-	$$->children.push_back($1);
-}
-| assign
-{
-	$$ = formNode(EXPR_t);
-	$$->children.push_back($1);
-}
-| declare
-{
-	$$ = formNode(EXPR_t);
-	$$->children.push_back($1);
+	// $$ = formNode(EXPR_t);
+	// $$->children.push_back($1);
+	$$ = $1;
 }
 | id OP_PP
 {
@@ -472,7 +451,7 @@ expr: expr OP_ADD expr
 }
 | OP_MUL id
 {
-	Node* sym = formNode(OP_t,OP_VALUE_t);
+	Node* sym = formNode(OP_t,OP_MUL_t);
 	$$ = formNode(EXPR_t);
 	$$->children.push_back(sym);
 	$$->children.push_back($2);
@@ -500,7 +479,7 @@ if: IF LBS expr RBS stmt
 }
 ;
 
-for: FOR LBS nullable_expr SEMI nullable_expr SEMI nullable_expr RBS stmt
+for: FOR LBS no_semi_stmt SEMI expr SEMI no_semi_stmt RBS stmt
 {
 	$$ = formNode(STMT_t,FOR_t);
 	$$->children.push_back($3);

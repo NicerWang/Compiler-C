@@ -22,15 +22,16 @@ int main()
         result = result * factorial;
         factorial = factorial - 1;
     }
-    printf("%d\n", result % 100);
+    printf("%d\n", result % 100 - 1);
+    i++;
 
-    for (int j = 0; j < result % 100 - 1; j++)
+    for (int j = 0; result % 100 - 1; j++)
     {
         for (int k = j + 1; k < result % 100 - 1; k++)
         {
             /*
             printf("Hello ~: %d", j);
-            */
+        */
             if (k - 5 == j || !j + 2 == k && k - 3 == j)
             {
                 int i = 0;
@@ -46,8 +47,8 @@ int main()
             {
                 printf("3: %d\n", i);
                 /*
-                printf("Aha~ %d", j);
-                */
+            printf("Aha~ %d", j);
+            */
             }
         }
     }

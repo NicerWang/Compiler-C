@@ -1,10 +1,10 @@
 int main()
 {
-    int a = 2;
+    int a;
     int b = 3;
     printf("%d, %d\n", a, b);
-    int* pa = &a;
-    int* pb = &b;
+    int *pa = &a;
+    int *pb = &b;
     int t = *pb;
     *pb = *pa;
     *pa = t;
