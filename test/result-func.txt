@@ -27,14 +27,14 @@ Parameters:
 ====== LEX RESULT ======
 INT
 OP_MUL
-ID do_it 5106593104
+ID do_it 4913655120
 LBS
 INT
-ID n 5106592304
+ID n 4913654320
 RBS
 LP
 RETURN
-ID n 5106595280
+ID n 4913657296
 OP_MOD
 NUMBER 2
 SEMI
@@ -47,7 +47,7 @@ LP
 ID printf ~
 LBS
 COMMA
-ID do_it 5106593104
+ID do_it 4913655120
 LBS
 NUMBER 5
 RBS
@@ -58,10 +58,10 @@ NUMBER 0
 SEMI
 RP
 ====== FUNCTIONS ======
-do_it     5106594864
+do_it     4913656880
 ====== IntermediateCODE ======
-1 [FUNC,do_it,{5106595280(n),},]
-2 [%,5106595280(n),2,temp0]
+1 [FUNC,do_it,{4913657296(n),},]
+2 [%,4913657296(n),2,temp0]
 3 [RET,temp0,,]
 4 [ENDF,do_it,,]
 5 [CALL,do_it,{5,},temp1]
