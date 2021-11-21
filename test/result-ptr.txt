@@ -1,27 +1,21 @@
-====== GRAMMER TREE ======
 ->ROOT
 -->EntryPoint
 --->Statement>COMPOUND
 ---->Statement>DECLARE
 ----->Type: Int
------>Statement>ASSIGN
------->ID:a
------->Expression
-------->Number:2
+----->ID:a
 ---->Statement>DECLARE
 ----->Type: Int
 ----->Statement>ASSIGN
 ------>ID:b
------->Expression
-------->Number:3
----->Statement>CALL
+------>Number:3
+---->Statement>CALLtemp0
 ----->ID:printf
 ----->Arguments: 
+Parameters: 
 ------>String:"%d, %d\n"
------->Expression
-------->ID:a
------->Expression
-------->ID:b
+------>ID:a
+------>ID:b
 ---->Statement>DECLARE
 ----->Type: Int Pointer:
 ----->Statement>ASSIGN
@@ -44,29 +38,27 @@
 ------->Operator> * 
 ------->ID:pb
 ---->Statement>ASSIGN
------>Expression
+----->Left Value:
 ------>Operator> * 
 ------>ID:pb
 ----->Expression
 ------>Operator> * 
 ------>ID:pa
 ---->Statement>ASSIGN
------>Expression
+----->Left Value:
 ------>Operator> * 
 ------>ID:pa
------>Expression
------->ID:t
----->Statement>CALL
+----->ID:t
+---->Statement>CALLtemp5
 ----->ID:printf
 ----->Arguments: 
+Parameters: 
 ------>String:"%d, %d\n"
------->Expression
-------->ID:a
------->Expression
-------->ID:b
+------>ID:a
+------>ID:b
 ---->Statement>RET
------>Expression
------->Number:0
+----->Number:0
+====== GRAMMER TREE ======
 ====== LEX RESULT ======
 INT
 MAIN
@@ -74,60 +66,58 @@ LBS
 RBS
 LP
 INT
-ID a 5668628672
-OP_ASSIGN
-NUMBER 2
+ID a 4955603680
 SEMI
 INT
-ID b 5668629488
+ID b 4955604032
 OP_ASSIGN
 NUMBER 3
 SEMI
 ID printf ~
 LBS
 COMMA
-ID a 5668628672
+ID a 4955603680
 COMMA
-ID b 5668629488
+ID b 4955604032
 RBS
 SEMI
 INT
 OP_MUL
-ID pa 5668631472
+ID pa 4955603712
 OP_ASSIGN
 BIT_AND
-ID a 5668628672
+ID a 4955603680
 SEMI
 INT
 OP_MUL
-ID pb 5668632624
+ID pb 4955604064
 OP_ASSIGN
 BIT_AND
-ID b 5668629488
+ID b 4955604032
 SEMI
 INT
-ID t 5668633264
+ID t 4955604432
 OP_ASSIGN
 OP_MUL
-ID pb 5668632624
+ID pb 4955604064
 SEMI
 OP_MUL
-ID pb 5668632624
+ID pb 4955604064
 OP_ASSIGN
 OP_MUL
-ID pa 5668631472
+ID pa 4955603712
 SEMI
 OP_MUL
-ID pa 5668631472
+ID pa 4955603712
 OP_ASSIGN
-ID t 5668633264
+ID t 4955604432
 SEMI
 ID printf ~
 LBS
 COMMA
-ID a 5668628672
+ID a 4955603680
 COMMA
-ID b 5668629488
+ID b 4955604032
 RBS
 SEMI
 RETURN
@@ -135,9 +125,27 @@ NUMBER 0
 SEMI
 RP
 ====== SYMBOL TABLE ======
-t     5668633264
-pb     5668632624
-pa     5668631472
-b     5668629488
-a     5668628672
-====== FUNCTIONS ======
+INT t     4955604432
+INT* pb     4955604064
+INT* pa     4955603712
+INT b     4955604032
+INT a     4955603680
+====== IntermediateCODE ======
+1 [DEC,a,4955603680, ]
+2 [DEC,b,4955604032, ]
+3 [=,4955604032(b),3,]
+4 [CALL,printf,{"%d, %d\n",4955603680(a),4955604032(b),},temp0]
+5 [DEC,pa,4955603712, ]
+6 [&,4955603680(a),,temp1]
+7 [=,4955603712(pa),temp1,]
+8 [DEC,pb,4955604064, ]
+9 [&,4955604032(b),,temp2]
+10 [=,4955604064(pb),temp2,]
+11 [DEC,t,4955604432, ]
+12 [*,4955604064(pb),,temp3]
+13 [=,4955604432(t),temp3,]
+14 [*,4955603712(pa),,temp4]
+15 [&=,4955604064(pb),temp4,]
+16 [&=,4955603712(pa),4955604432(t),]
+17 [CALL,printf,{"%d, %d\n",4955603680(a),4955604032(b),},temp5]
+18 [RET,0,,]

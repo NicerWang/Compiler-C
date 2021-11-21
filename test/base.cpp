@@ -2,8 +2,12 @@
 int printf()
 {
     int n = 5;
+    return n;
 }
-int scanf() {}
+int scanf()
+{
+    return 0;
+}
 
 int main()
 {
@@ -27,7 +31,7 @@ int main()
 
     for (int j = 0; result % 100 - 1; j++)
     {
-        for (int k = j + 1; k < result % 100 - 1; k++)
+        for (int k = j + 1; k < result % 100 - 1; ++k)
         {
             /*
             printf("Hello ~: %d", j);
@@ -55,20 +59,20 @@ int main()
     return 0;
 }
 
-/*
+// /*
 
-<your input>
-<correspnding output>
-6
-3: 0
-3: 0
-1: 0
-3: 0
-3: 0
-3: 0
-2: 2
-3: 2
-3: 2
-3: 2
+// <your input>
+// <correspnding output>
+// 6
+// 3: 0
+// 3: 0
+// 1: 0
+// 3: 0
+// 3: 0
+// 3: 0
+// 2: 2
+// 3: 2
+// 3: 2
+// 3: 2
 
-*/
+// */

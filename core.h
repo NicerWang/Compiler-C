@@ -1,12 +1,17 @@
 #include "struct.h"
 
+#define PRE_PLUS 1
+#define POST_PLUS 2
+#define PRE_SUB 3
+#define POST_SUB 4
+
 extern string lexRes;
-string intermidiateCode;
 Node *root;
 
 vector<Symbol *> symbolTable;
 vector<Symbol *> availNodes;
 vector<Symbol *> funcNodes;
+vector<string> Intermediate;
 int availNodesCnt = 0;
 int tempValCnt = 0;
 
@@ -17,6 +22,7 @@ Symbol *formSymbol(string id, SymType type)
 	sym->id = id;
 	return sym;
 }
+
 Node *formNode(NodeType type, SubType subType = NONE_t)
 {
 	Node *newNode = new Node();
@@ -24,6 +30,7 @@ Node *formNode(NodeType type, SubType subType = NONE_t)
 	newNode->subType = subType;
 	return newNode;
 }
+
 void addChildren(Node *node, vector<Node *> *nodes)
 {
 	vector<Node *> arr = *nodes;
@@ -32,170 +39,130 @@ void addChildren(Node *node, vector<Node *> *nodes)
 		node->children.push_back(arr[i]);
 	}
 }
-void processNode(Node *node)
+
+void preProcess(Node *node)
 {
+	if (node->type == STMT_t && node->subType == DECLARE_t)
 	{
-		switch (node->type)
+		string op = "";
+		string var1 = "";
+		string var2 = "";
+		SymType type;
+		if (node->children[0]->subType == INT_t)
 		{
-		case STMT_t:
+			type = SYM_INT_t;
+		}
+		else if (node->children[0]->subType == INT_STAR_t)
 		{
-			switch (node->subType)
+			type = SYM_INT_STAR_t;
+		}
+		for (int i = 1; i < node->children.size(); i++)
+		{
+			availNodesCnt++;
+			Symbol *sym;
+			if (node->children[i]->subType == ASSIGN_t)
 			{
-			case DECLARE_t:
+				sym = formSymbol(node->children[i]->children[0]->strValue, type);
+			}
+			else
 			{
-				string op = "";
-				string var1 = "";
-				string var2 = "";
-				SymType type;
-				if (node->children[0]->subType == INT_t)
-				{
-					type = SYM_INT_t;
-				}
-				else if (node->children[0]->subType == INT_STAR_t)
-				{
-					type = SYM_INT_STAR_t;
-				}
-				for (int i = 1; i < node->children.size(); i++)
-				{
-					availNodesCnt++;
-					Symbol *sym;
-					if (node->children[i]->subType == ASSIGN_t)
-					{
-						sym = formSymbol(node->children[i]->children[0]->strValue, type);
-					}
-					else
-					{
-						sym = formSymbol(node->children[i]->strValue, type);
-					}
-					availNodes.push_back(sym);
-					op = "DEC";
-					var1 = sym->id;
-					var2 = to_string((long long)&availNodes[availNodes.size() - 1]);
-				}
-				if (op != "")
-				{
-					intermidiateCode += "[" + op + "," + var1 + "," + var2 + "," + " ]\n";
-				}
-
+				sym = formSymbol(node->children[i]->strValue, type);
+			}
+			availNodes.push_back(sym);
+			op = "DEC";
+			var1 = sym->id;
+			var2 = to_string((long long)availNodes[availNodes.size() - 1]);
+		}
+		if (op != "")
+		{
+			Intermediate.push_back("[" + op + "," + var1 + "," + var2 + "," + " ]\n");
+		}
+	}
+	if (node->type == VAR_t && node->subType == ID_t)
+	{
+		for (int i = availNodesCnt - 1; i >= 0; i--)
+		{
+			if (availNodes[i]->id == node->strValue)
+			{
+				lexRes = lexRes.replace(lexRes.find(node->strValue + " ~") + node->strValue.length() + 1, 1, to_string((long long)availNodes[i]));
 				break;
 			}
-
-			default:
-			{
-			}
-			}
-			break;
 		}
-		case VAR_t:
+	}
+	if (node->type == FUNC_t)
+	{
+		string arguments = "{";
+		funcNodes.push_back(formSymbol(node->children[0]->strValue, SYM_FUNC_t));
+		while (lexRes.find(node->children[0]->strValue + " ~") != -1)
 		{
-			switch (node->subType)
-			{
-			case ID_t:
-			{
-				for (int i = availNodesCnt - 1; i >= 0; i--)
-				{
-					if (availNodes[i]->id == node->strValue)
-					{
-						lexRes = lexRes.replace(lexRes.find(node->strValue + " ~") + node->strValue.length() + 1, 1, to_string((long long)availNodes[i]));
-						break;
-					}
-				}
-				break;
-			}
-			default:
-			{
-			}
-			}
-			break;
+			lexRes = lexRes.replace(lexRes.find(node->children[0]->strValue + " ~") + node->children[0]->strValue.length() + 1, 1, to_string((long long)node));
 		}
-		case FUNC_t:
+		for (int i = 0; i < node->children[1]->children.size(); i++)
 		{
-
-			funcNodes.push_back(formSymbol(node->children[0]->strValue, SYM_FUNC_t));
-			while (lexRes.find(node->children[0]->strValue + " ~") != -1)
+			availNodesCnt++;
+			SymType type;
+			if (node->children[1]->children[i]->subType == INT_t)
 			{
-				lexRes = lexRes.replace(lexRes.find(node->children[0]->strValue + " ~") + node->children[0]->strValue.length() + 1, 1, to_string((long long)node));
+				type = SYM_INT_t;
 			}
-			for (int i = 0; i < node->children[1]->children.size(); i++)
+			else if (node->children[1]->children[i]->subType == INT_STAR_t)
 			{
-				availNodesCnt++;
-				SymType type;
-				if (node->children[1]->children[i]->subType == INT_t)
-				{
-					type = SYM_INT_t;
-				}
-				else if (node->children[1]->children[i]->subType == INT_STAR_t)
-				{
-					type = SYM_INT_STAR_t;
-				}
-
-				availNodes.push_back(formSymbol(node->children[1]->children[i]->strValue, type));
-				lexRes = lexRes.replace(lexRes.find(node->children[1]->children[i]->strValue + " ~") + node->children[1]->children[i]->strValue.length() + 1, 1, to_string((long long)node->children[1]->children[i]));
+				type = SYM_INT_STAR_t;
 			}
-			break;
+			availNodes.push_back(formSymbol(node->children[1]->children[i]->strValue, type));
+			int k;
+			for (k = availNodes.size() - 1; k >= 0; k--)
+				if (availNodes[k]->id == node->children[1]->children[k]->strValue)
+					break;
+			arguments += to_string((long long)availNodes[k]) + "(" + node->children[1]->children[i]->strValue + "),";
+			lexRes = lexRes.replace(lexRes.find(node->children[1]->children[i]->strValue + " ~") + node->children[1]->children[i]->strValue.length() + 1, 1, to_string((long long)node->children[1]->children[i]));
 		}
-		default:
-		{
-		}
-		}
-		return;
+		arguments += "}";
+		Intermediate.push_back("[FUNC," + node->children[0]->strValue + "," + arguments + ",]\n");
 	}
 }
 
-void formIntermidiateCode(Node *node, int depth)
+void postProcess(Node *node)
 {
-	processNode(node);
-	if (node->type == VAR_t || node->type == OP_t || node->type == TYPE_t)
-		return;
-	int blockVarCntNow = availNodesCnt;
-
-	for (int i = 0; i < node->children.size(); i++)
-	{
-		formIntermidiateCode(node->children[i], depth + 1);
-	}
-
 	string op = "";
 	string var1 = "";
 	string var2 = "";
 	string ret = "";
+	int preOrPost = 0;
+
 	if (node->type == EXPR_t)
 	{
-		for (int i = node->children.size() - 1; i >= 0; i--)
+		for (int i = 0; i < node->children.size(); i++)
 		{
 			if (node->children[i]->type == EXPR_t)
 			{
-				if (var2.size() == 0)
-					var2 = node->children[i]->strValue;
-				else
+				if (var1.size() == 0)
 					var1 = node->children[i]->strValue;
+				else
+					var2 = node->children[i]->strValue;
 			}
-			if (node->children[i]->type == VAR_t)
+			else if (node->children[i]->type == VAR_t)
 			{
 				if (node->children[i]->subType == NUMBER_t)
 				{
-					if (var2.size() == 0)
-						var2 = to_string(node->children[i]->intValue);
-					else
+					if (var1.size() == 0)
 						var1 = to_string(node->children[i]->intValue);
+					else
+						var2 = to_string(node->children[i]->intValue);
 				}
 				else
 				{
 					int j;
 					for (j = availNodes.size() - 1; j >= 0; j--)
-					{
 						if (availNodes[j]->id == node->children[i]->strValue)
-						{
 							break;
-						}
-					}
-
-					if (var2.size() == 0)
-						var2 = to_string((long long)&availNodes[j]) + "(" + availNodes[j]->id + ")";
+					if (var1.size() == 0)
+						var1 = to_string((long long)availNodes[j]) + "(" + availNodes[j]->id + ")";
 					else
-						var1 = to_string((long long)&availNodes[j]) + "(" + availNodes[j]->id + ")";
+						var2 = to_string((long long)availNodes[j]) + "(" + availNodes[j]->id + ")";
 				}
 			}
-			if (node->children[i]->type == OP_t)
+			else if (node->children[i]->type == OP_t)
 			{
 				switch (node->children[i]->subType)
 				{
@@ -206,11 +173,23 @@ void formIntermidiateCode(Node *node, int depth)
 					op = "&";
 					break;
 				case OP_PP_t:
+				{
 					op = "++";
+					if (i == 0)
+						preOrPost = PRE_PLUS;
+					else
+						preOrPost = POST_PLUS;
 					break;
+				}
 				case OP_MM_t:
+				{
 					op = "--";
+					if (i == 0)
+						preOrPost = PRE_SUB;
+					else
+						preOrPost = POST_SUB;
 					break;
+				}
 				case OP_SUB_t:
 					op = "-";
 					break;
@@ -274,11 +253,10 @@ void formIntermidiateCode(Node *node, int depth)
 
 		int i;
 		for (i = availNodesCnt - 1; i >= 0; i--)
-		{
 			if (availNodes[i]->id == target)
 				break;
-		}
-		var1 = to_string((long long)&availNodes[i]) + "(" + target + ")";
+
+		var1 = to_string((long long)availNodes[i]) + "(" + target + ")";
 
 		if (node->children[1]->type == EXPR_t)
 		{
@@ -290,24 +268,158 @@ void formIntermidiateCode(Node *node, int depth)
 				var2 = to_string(node->children[1]->intValue);
 			else
 			{
-				string target2 = node->children[1]->strValue;
+				string anotherTarget = node->children[1]->strValue;
 				int k;
 				for (k = availNodesCnt - 1; k >= 0; k--)
-				{
-					if (availNodes[i]->id == target2)
+					if (availNodes[k]->id == anotherTarget)
 						break;
-				}
-				var2 = to_string((long long)&availNodes[k]) + "(" + target2 + ")";
+				var2 = to_string((long long)availNodes[k]) + "(" + anotherTarget + ")";
 			}
 		}
 	}
-
-	if (op != "")
+	else if (node->type == STMT_t && node->subType == RET_t)
 	{
-		intermidiateCode += "[" + op + "," + var1 + "," + var2 + "," + ret + "]\n";
+		op = "RET";
+		if (node->children[0]->type == EXPR_t)
+		{
+			var1 = node->children[0]->strValue;
+		}
+		else if (node->children[0]->type == VAR_t)
+		{
+			if (node->children[0]->subType == NUMBER_t)
+				var1 = to_string(node->children[0]->intValue);
+			else
+			{
+				string target = node->children[0]->strValue;
+				int i;
+				for (i = availNodesCnt - 1; i >= 0; i--)
+				{
+					if (availNodes[i]->id == target)
+						break;
+				}
+				var1 = to_string((long long)availNodes[i]) + "(" + target + ")";
+			}
+		}
 	}
+	else if (node->type == STMT_t && node->subType == CALL_t)
+	{
+		op = "CALL";
+		ret = "temp" + to_string(tempValCnt++);
+		node->strValue = ret;
+		var1 = node->children[0]->strValue;
+		var2 = "{";
+		for (int i = 0; i < node->children[1]->children.size(); i++)
+		{
+			if (node->children[1]->children[i]->type == EXPR_t || node->children[1]->children[i]->subType == CALL_t)
+			{
+				var2 += node->children[1]->children[i]->strValue + ",";
+			}
+			else if (node->children[1]->children[i]->type == VAR_t)
+			{
+				if (node->children[1]->children[i]->subType == NUMBER_t)
+					var2 += to_string(node->children[1]->children[i]->intValue) + ",";
+				else if (node->children[1]->children[i]->subType == ID_t)
+				{
+					string target = node->children[1]->children[i]->strValue;
+					int k;
+					for (k = availNodesCnt - 1; k >= 0; k--)
+					{
+						if (availNodes[k]->id == target)
+							break;
+					}
+					var2 += to_string((long long)availNodes[k]) + "(" + target + "),";
+				}
+				else
+				{
+					var2 += node->children[1]->children[i]->strValue + ",";
+				}
+			}
+		}
+		var2 += "}";
+	}
+	else if (node->type == FUNC_t)
+	{
+		op = "ENDF";
+		var1 = node->children[0]->strValue;
+	}
+	if (preOrPost == PRE_PLUS)
+	{
+		Intermediate.push_back("[+," + var1 + ",1," + var1 + "]\n");
+	}
+	if (preOrPost == PRE_SUB)
+	{
+		Intermediate.push_back("[-," + var1 + ",1," + var1 + "]\n");
+	}
+	if (op.size() != 0 && preOrPost == 0)
+	{
+		Intermediate.push_back("[" + op + "," + var1 + "," + var2 + "," + ret + "]\n");
+	}
+	if (preOrPost != 0)
+	{
+		Intermediate.push_back("[=," + ret + "," + var1 + ", ]\n");
+	}
+	if (preOrPost == POST_PLUS)
+	{
+		Intermediate.push_back("[+," + var1 + ",1," + var1 + "]\n");
+	}
+	if (preOrPost == POST_SUB)
+	{
+		Intermediate.push_back("[-," + var1 + ",1," + var1 + "]\n");
+	}
+}
+
+void formIntermediateCode(Node *node)
+{
+	preProcess(node);
+	int blockVarCnt = availNodesCnt;
+	if (node->subType == IF_t)
+	{
+		formIntermediateCode(node->children[0]);
+		Intermediate.push_back("[IFNZ," + node->children[0]->strValue + ",," + to_string(Intermediate.size() + 3) + "]\n");
+		Intermediate.push_back("JMP");
+		int jmpPos = Intermediate.size() - 1;
+		formIntermediateCode(node->children[1]);
+		if (node->children.size() > 2)
+			Intermediate.push_back("JMP");
+		int elsePos = Intermediate.size() - 1;
+		Intermediate[jmpPos] = "[JMP,,," + to_string(Intermediate.size() + 1) + "]\n";
+		if (node->children.size() > 2)
+		{
+			formIntermediateCode(node->children[2]);
+			Intermediate[elsePos] = "[JMP,,," + to_string(Intermediate.size() + 1) + "]\n";
+		}
+	}
+	else if (node->subType == WHILE_t)
+	{
+		int startLine = Intermediate.size() + 1;
+		formIntermediateCode(node->children[0]);
+		Intermediate.push_back("[IFNZ," + node->children[0]->strValue + ",," + to_string(Intermediate.size() + 3) + "]\n");
+		Intermediate.push_back("JMP");
+		int jmpPos = Intermediate.size() - 1;
+		formIntermediateCode(node->children[1]);
+		Intermediate.push_back("[JMP,,," + to_string(startLine) + "]\n");
+		Intermediate[jmpPos] = "[JMP,,," + to_string(Intermediate.size() + 1) + "]\n";
+	}
+	else if (node->subType == FOR_t)
+	{
+		formIntermediateCode(node->children[0]);
+		int startLine = Intermediate.size() + 1;
+		formIntermediateCode(node->children[1]);
+		Intermediate.push_back("[IFNZ," + node->children[1]->strValue + ",," + to_string(Intermediate.size() + 3) + "]\n");
+		Intermediate.push_back("JMP");
+		int jmpPos = Intermediate.size() - 1;
+		formIntermediateCode(node->children[3]);
+		formIntermediateCode(node->children[2]);
+		Intermediate.push_back("[JMP,,," + to_string(startLine) + "]\n");
+		Intermediate[jmpPos] = "[JMP,,," + to_string(Intermediate.size() + 1) + "]\n";
+	}
+	else
+		for (int i = 0; i < node->children.size(); i++)
+			formIntermediateCode(node->children[i]);
+
+	postProcess(node);
 	if ((node->type == STMT_t && (node->subType == FOR_t || node->subType == COMPOUND_t)) || node->type == FUNC_t)
-		while (availNodesCnt > blockVarCntNow)
+		while (availNodesCnt > blockVarCnt)
 		{
 			symbolTable.push_back(availNodes[availNodesCnt - 1]);
 			availNodes.pop_back();
@@ -315,28 +427,7 @@ void formIntermidiateCode(Node *node, int depth)
 		}
 }
 
-void showTable()
-{
-	cout << "====== SYMBOL TABLE ======" << endl;
-	for (int i = 0; i < symbolTable.size(); i++)
-	{
-		if (symbolTable[i]->type == SYM_INT_t)
-			cout << "INT ";
-		if (symbolTable[i]->type == SYM_INT_STAR_t)
-			cout << "INT* ";
-		cout << symbolTable[i]->id << "     " << (long long)symbolTable[i] << endl;
-	}
-	cout << "====== FUNCTIONS ======" << endl;
-	for (int i = 0; i < funcNodes.size(); i++)
-	{
-		cout << funcNodes[i]->id << "     " << (long long)funcNodes[i] << endl;
-	}
-	formIntermidiateCode(root, 1);
-	cout << "====== INTERMIDIATECODE ======" << endl;
-	cout << intermidiateCode << endl;
-}
-
-void showNode(Node *node, int depth)
+void showGrammerTreeNode(Node *node, int depth)
 {
 	for (int i = 0; i < depth; i++)
 		cout << "-";
@@ -375,39 +466,6 @@ void showNode(Node *node, int depth)
 		}
 		case DECLARE_t:
 		{
-			string op = "";
-			string var1 = "";
-			string var2 = "";
-			SymType type;
-			if (node->children[0]->subType == INT_t)
-			{
-				type = SYM_INT_t;
-			}
-			else if (node->children[0]->subType == INT_STAR_t)
-			{
-				type = SYM_INT_STAR_t;
-			}
-			for (int i = 1; i < node->children.size(); i++)
-			{
-				availNodesCnt++;
-				Symbol *sym;
-				if (node->children[i]->subType == ASSIGN_t)
-				{
-					sym = formSymbol(node->children[i]->children[0]->strValue, type);
-				}
-				else
-				{
-					sym = formSymbol(node->children[i]->strValue, type);
-				}
-				availNodes.push_back(sym);
-				op = "";
-				var1 = sym->id;
-				var2 = to_string((long long)&availNodes[availNodes.size() - 1]);
-			}
-			if (op != "")
-			{
-				intermidiateCode += "[" + op + "," + var1 + "," + var2 + "," + " ]\n";
-			}
 			cout << ">DECLARE";
 			break;
 		}
@@ -426,9 +484,6 @@ void showNode(Node *node, int depth)
 			cout << ">COMPOUND";
 			break;
 		}
-		default:
-		{
-		}
 		}
 		cout << endl;
 		break;
@@ -445,14 +500,6 @@ void showNode(Node *node, int depth)
 		case ID_t:
 		{
 			cout << "ID:" + node->strValue << endl;
-			for (int i = availNodesCnt - 1; i >= 0; i--)
-			{
-				if (availNodes[i]->id == node->strValue)
-				{
-					lexRes = lexRes.replace(lexRes.find(node->strValue + " ~") + node->strValue.length() + 1, 1, to_string((long long)availNodes[i]));
-					break;
-				}
-			}
 			break;
 		}
 		case STRING_t:
@@ -463,9 +510,6 @@ void showNode(Node *node, int depth)
 		case LEFT_VALUE_t:
 		{
 			cout << "Left Value:" << endl;
-		}
-		default:
-		{
 		}
 		}
 		break;
@@ -560,9 +604,6 @@ void showNode(Node *node, int depth)
 			cout << "> != " << endl;
 			break;
 		}
-		default:
-		{
-		}
 		}
 		break;
 	}
@@ -581,30 +622,6 @@ void showNode(Node *node, int depth)
 			cout << "|Int*" << endl;
 			break;
 		}
-		default:
-		{
-		}
-		}
-		funcNodes.push_back(formSymbol(node->children[0]->strValue, SYM_FUNC_t));
-		while (lexRes.find(node->children[0]->strValue + " ~") != -1)
-		{
-			lexRes = lexRes.replace(lexRes.find(node->children[0]->strValue + " ~") + node->children[0]->strValue.length() + 1, 1, to_string((long long)node));
-		}
-		for (int i = 0; i < node->children[1]->children.size(); i++)
-		{
-			availNodesCnt++;
-			SymType type;
-			if (node->children[1]->children[i]->subType == INT_t)
-			{
-				type = SYM_INT_t;
-			}
-			else if (node->children[1]->children[i]->subType == INT_STAR_t)
-			{
-				type = SYM_INT_STAR_t;
-			}
-
-			availNodes.push_back(formSymbol(node->children[1]->children[i]->strValue, type));
-			lexRes = lexRes.replace(lexRes.find(node->children[1]->children[i]->strValue + " ~") + node->children[1]->children[i]->strValue.length() + 1, 1, to_string((long long)node->children[1]->children[i]));
 		}
 		break;
 	}
@@ -627,9 +644,6 @@ void showNode(Node *node, int depth)
 			cout << "Type: Int Pointer:" + node->strValue << endl;
 			break;
 		}
-		default:
-		{
-		}
 		}
 		break;
 	}
@@ -647,11 +661,8 @@ void showNode(Node *node, int depth)
 			cout << "Arguments: " << endl;
 			break;
 		}
-		default:
-		{
-		}
-		}
 		break;
+		}
 	}
 	case PARAM_t:
 	{
@@ -675,9 +686,6 @@ void showNode(Node *node, int depth)
 			cout << "Parameters: " << endl;
 			break;
 		}
-		default:
-		{
-		}
 		}
 		break;
 	}
@@ -694,29 +702,39 @@ void showNode(Node *node, int depth)
 	return;
 }
 
-void dfs(Node *node, int depth)
+void grammerTreeDfs(Node *node, int depth)
 {
-	int blockVarCntNow = availNodesCnt;
-	showNode(node, depth);
+	showGrammerTreeNode(node, depth);
 	for (int i = 0; i < node->children.size(); i++)
 	{
-		dfs(node->children[i], depth + 1);
+		grammerTreeDfs(node->children[i], depth + 1);
 	}
-	if ((node->type == STMT_t && (node->subType == FOR_t || node->subType == COMPOUND_t)) || node->type == FUNC_t)
-		while (availNodesCnt > blockVarCntNow)
-		{
-			symbolTable.push_back(availNodes[availNodesCnt - 1]);
-			availNodes.pop_back();
-			availNodesCnt--;
-		}
 }
 
 void showTree(Node *node)
 {
-
+	formIntermediateCode(root);
+	grammerTreeDfs(root, 1);
 	cout << "====== GRAMMER TREE ======" << endl;
-	dfs(root, 1);
 	cout << "====== LEX RESULT ======" << endl;
 	cout << lexRes;
-	showTable();
+	if (!symbolTable.empty())
+		cout << "====== SYMBOL TABLE ======" << endl;
+	for (int i = 0; i < symbolTable.size(); i++)
+	{
+		if (symbolTable[i]->type == SYM_INT_t)
+			cout << "INT ";
+		if (symbolTable[i]->type == SYM_INT_STAR_t)
+			cout << "INT* ";
+		cout << symbolTable[i]->id << "     " << (long long)symbolTable[i] << endl;
+	}
+	if (!funcNodes.empty())
+		cout << "====== FUNCTIONS ======" << endl;
+	for (int i = 0; i < funcNodes.size(); i++)
+	{
+		cout << funcNodes[i]->id << "     " << (long long)funcNodes[i] << endl;
+	}
+	cout << "====== IntermediateCODE ======" << endl;
+	for (int i = 0; i < Intermediate.size(); i++)
+		cout << i + 1 << " " << Intermediate[i];
 }

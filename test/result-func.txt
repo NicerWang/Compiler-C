@@ -1,42 +1,40 @@
-====== GRAMMER TREE ======
 ->ROOT
--->Function|Int
+-->Function|Int*
 --->ID:do_it
 --->Parameters: 
 ---->n|INT
 --->Statement>COMPOUND
 ---->Statement>RET
 ----->Expression
------->Expression
-------->ID:n
+------>ID:n
 ------>Operator> % 
------->Expression
-------->Number:2
+------>Number:2
 -->EntryPoint
 --->Statement>COMPOUND
----->Statement>CALL
+---->Statement>CALLtemp2
 ----->ID:printf
 ----->Arguments: 
+Parameters: 
 ------>String:"%d"
------->Expression
-------->Statement>CALL
--------->ID:do_it
--------->Arguments: 
---------->Expression
----------->Number:5
+------>Statement>CALLtemp1
+------->ID:do_it
+------->Arguments: 
+Parameters: 
+-------->Number:5
 ---->Statement>RET
------>Expression
------->Number:0
+----->Number:0
+====== GRAMMER TREE ======
 ====== LEX RESULT ======
 INT
-ID do_it 5442137712
+OP_MUL
+ID do_it 5106593104
 LBS
 INT
-ID n 5442136576
+ID n 5106592304
 RBS
 LP
 RETURN
-ID n 5442136576
+ID n 5106595280
 OP_MOD
 NUMBER 2
 SEMI
@@ -49,7 +47,7 @@ LP
 ID printf ~
 LBS
 COMMA
-ID do_it 5442137712
+ID do_it 5106593104
 LBS
 NUMBER 5
 RBS
@@ -59,7 +57,13 @@ RETURN
 NUMBER 0
 SEMI
 RP
-====== SYMBOL TABLE ======
-n     5442136576
 ====== FUNCTIONS ======
-do_it     5442137712
+do_it     5106594864
+====== IntermediateCODE ======
+1 [FUNC,do_it,{5106595280(n),},]
+2 [%,5106595280(n),2,temp0]
+3 [RET,temp0,,]
+4 [ENDF,do_it,,]
+5 [CALL,do_it,{5,},temp1]
+6 [CALL,printf,{"%d",temp1,},temp2]
+7 [RET,0,,]
