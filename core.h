@@ -7,14 +7,55 @@
 
 extern string lexRes;
 extern int yylineno;
+int offset = 0;
+int throwLine = -1;
 Node *root;
 
 vector<Symbol *> symbolTable;
 vector<Symbol *> availNodes;
 vector<Symbol *> funcNodes;
-vector<string> Intermediate;
+vector<vector<string>> intermediate;
 int availNodesCnt = 0;
 int tempValCnt = 0;
+
+void typeError(Node *node, string op)
+{
+	cout << "[error] Type error in line " << node->lineno << endl;
+	if (op == "&=" || op == "=")
+		cout << "Different types between = operator." << endl;
+	else
+		cout << "Wrong operands type to use operator" + op + "." << endl;
+	exit(-1);
+}
+
+vector<string> formLine(string op, string var1, string var2, string ret)
+{
+	vector<string> temp;
+	temp.push_back(op);
+	temp.push_back(var1);
+	temp.push_back(var2);
+	temp.push_back(ret);
+	return temp;
+}
+
+void undefinedError(Node *node, string op)
+{
+
+	cout << "[error] Undefined error in line " << node->lineno << endl;
+	cout << "Use " + op + " before declare." << endl;
+}
+
+void typeCheck(Node *node, SymType type, string op)
+{
+	for (int i = 0; i < node->children.size(); i++)
+	{
+		if (node->children[i]->type != OP_t)
+		{
+			if (node->children[i]->symType != type)
+				typeError(node, op);
+		}
+	}
+}
 
 Symbol *formSymbol(string id, SymType type)
 {
@@ -77,17 +118,26 @@ void preProcess(Node *node)
 		}
 		if (op != "")
 		{
-			Intermediate.push_back("[" + op + "," + var1 + "," + var2 + ",_]\n");
+			intermediate.push_back(formLine(op, var1, var2, "_"));
 		}
 	}
 	if (node->type == VAR_t && node->subType == ID_t)
 	{
+		if (node->strValue == "printf" || node->strValue == "scanf")
+			return;
 		for (int i = availNodesCnt - 1; i >= 0; i--)
 		{
 			if (availNodes[i]->id == node->strValue)
 			{
 				lexRes = lexRes.replace(lexRes.find(node->strValue + " ~") + node->strValue.length() + 1, 1, to_string((long long)availNodes[i]));
+				node->symType = availNodes[i]->type;
 				break;
+			}
+			if (i == 0)
+			{
+				undefinedError(node, node->strValue);
+				throwLine = node->lineno;
+				cout << throwLine << endl;
 			}
 		}
 	}
@@ -129,7 +179,7 @@ void preProcess(Node *node)
 		}
 		funcNodes.push_back(func);
 		arguments += "}";
-		Intermediate.push_back("[FUNC," + node->children[0]->strValue + "," + arguments + ",_]\n");
+		intermediate.push_back(formLine("FUNC", node->children[0]->strValue, arguments, "_"));
 	}
 }
 
@@ -143,6 +193,7 @@ void postProcess(Node *node)
 
 	if (node->type == EXPR_t)
 	{
+		SymType exprType = SYM_INT_t;
 		for (int i = 0; i < node->children.size(); i++)
 		{
 			if (node->children[i]->type == EXPR_t)
@@ -178,8 +229,11 @@ void postProcess(Node *node)
 				switch (node->children[i]->subType)
 				{
 				case OP_ADD_t:
+				{
 					op = "+";
+					typeCheck(node, SYM_INT_t, op);
 					break;
+				}
 				case OP_PP_t:
 				{
 					op = "++";
@@ -187,6 +241,7 @@ void postProcess(Node *node)
 						preOrPost = PRE_PLUS;
 					else
 						preOrPost = POST_PLUS;
+					typeCheck(node, SYM_INT_t, op);
 					break;
 				}
 				case OP_MM_t:
@@ -196,65 +251,116 @@ void postProcess(Node *node)
 						preOrPost = PRE_SUB;
 					else
 						preOrPost = POST_SUB;
+					typeCheck(node, SYM_INT_t, op);
 					break;
 				}
 				case OP_SUB_t:
+				{
 					op = "-";
+					typeCheck(node, SYM_INT_t, op);
 					break;
+				}
 				case OP_MUL_t:
+				{
 					op = "*";
+					if (i == 0)
+						typeCheck(node, SYM_INT_STAR_t, op);
+					else
+						typeCheck(node, SYM_INT_t, op);
 					break;
+				}
+
 				case OP_ADDRESS_t:
+				{
 					op = "&";
+					exprType = SYM_INT_STAR_t;
+					typeCheck(node, SYM_INT_t, op);
 					break;
+				}
 				case OP_DIV_t:
+				{
 					op = "/";
+					typeCheck(node, SYM_INT_t, op);
 					break;
+				}
 				case OP_MOD_t:
+				{
 					op = "%";
+					typeCheck(node, SYM_INT_t, op);
 					break;
+				}
 				case AND_t:
+				{
 					op = "&&";
+					typeCheck(node, SYM_INT_t, op);
 					break;
+				}
 				case OR_t:
+				{
 					op = "||";
+					typeCheck(node, SYM_INT_t, op);
 					break;
+				}
 				case NOT_t:
+				{
 					op = "!";
+					typeCheck(node, SYM_INT_t, op);
 					break;
+				}
 				case LT_t:
+				{
 					op = "<";
+					typeCheck(node, SYM_INT_t, op);
 					break;
+				}
 				case LE_t:
+				{
 					op = "<=";
+					typeCheck(node, SYM_INT_t, op);
 					break;
+				}
 				case EQ_t:
+				{
 					op = "==";
+					typeCheck(node, SYM_INT_t, op);
 					break;
+				}
 				case NE_t:
+				{
 					op = "!=";
+					typeCheck(node, SYM_INT_t, op);
 					break;
+				}
 				case GT_t:
+				{
 					op = ">";
+					typeCheck(node, SYM_INT_t, op);
 					break;
+				}
 				case GE_t:
+				{
 					op = ">=";
+					typeCheck(node, SYM_INT_t, op);
 					break;
+				}
 				default:
 					break;
 				}
 			}
 		}
+		node->symType = exprType;
 		node->strValue = "temp" + to_string(tempValCnt++);
 		ret = node->strValue;
 	}
 	else if (node->type == STMT_t && node->subType == ASSIGN_t)
 	{
 		string target;
+		SymType targetType = SYM_INT_t;
 		if (node->children[0]->subType == ID_t)
 		{
 			target = node->children[0]->strValue;
 			op = "=";
+			targetType = node->children[0]->symType;
 		}
 		else if (node->children[0]->subType == LEFT_VALUE_t)
 		{
@@ -268,6 +374,11 @@ void postProcess(Node *node)
 				break;
 
 		var1 = to_string((long long)availNodes[i]) + "(" + target + ")";
+
+		if (node->children[1]->symType != targetType)
+		{
+			typeError(node, "=");
+		}
 
 		if (node->children[1]->type == EXPR_t)
 		{
@@ -355,74 +466,79 @@ void postProcess(Node *node)
 	}
 	if (preOrPost == PRE_PLUS)
 	{
-		Intermediate.push_back("[+," + var1 + ",1," + var1 + "]\n");
+		intermediate.push_back(formLine("+", var1, "1", var1));
 	}
 	if (preOrPost == PRE_SUB)
 	{
-		Intermediate.push_back("[-," + var1 + ",1," + var1 + "]\n");
+		intermediate.push_back(formLine("-", var1, "1", var1));
 	}
 	if (op != "_" && preOrPost == 0)
 	{
-		Intermediate.push_back("[" + op + "," + var1 + "," + var2 + "," + ret + "]\n");
+		intermediate.push_back(formLine(op, var1, var2, ret));
 	}
 	if (preOrPost != 0)
 	{
-		Intermediate.push_back("[=," + ret + "," + var1 + ",_]\n");
+		intermediate.push_back(formLine("=", ret, var1, "_"));
 	}
 	if (preOrPost == POST_PLUS)
 	{
-		Intermediate.push_back("[+," + var1 + ",1," + var1 + "]\n");
+		intermediate.push_back(formLine("+", var1, "1", var1));
 	}
 	if (preOrPost == POST_SUB)
 	{
-		Intermediate.push_back("[-," + var1 + ",1," + var1 + "]\n");
+		intermediate.push_back(formLine("-", var1, "1", var1));
 	}
 }
 
 void formIntermediateCode(Node *node)
 {
+	if (node->lineno == throwLine)
+		return;
 	int blockVarCnt = availNodesCnt;
 	preProcess(node);
 	if (node->subType == IF_t)
 	{
 		formIntermediateCode(node->children[0]);
-		Intermediate.push_back("[IFNZ," + node->children[0]->strValue + ",_," + to_string(Intermediate.size() + 3) + "]\n");
-		Intermediate.push_back("JMP");
-		int jmpPos = Intermediate.size() - 1;
+		intermediate.push_back(formLine("IFNZ", node->children[0]->strValue, "_", to_string(intermediate.size() + 3)));
+		intermediate.push_back(formLine("JMP", "_", "_", "_"));
+		int jmpPos = intermediate.size() - 1;
 		formIntermediateCode(node->children[1]);
 		if (node->children.size() > 2)
-			Intermediate.push_back("JMP");
-		int elsePos = Intermediate.size() - 1;
-		Intermediate[jmpPos] = "[JMP,_,_," + to_string(Intermediate.size() + 1) + "]\n";
+		{
+			intermediate.push_back(formLine("JMP", "_", "_", "_"));
+		}
+
+		int elsePos = intermediate.size() - 1;
+		intermediate[jmpPos][3] = to_string(intermediate.size() + 1);
 		if (node->children.size() > 2)
 		{
 			formIntermediateCode(node->children[2]);
-			Intermediate[elsePos] = "[JMP,_,_," + to_string(Intermediate.size() + 1) + "]\n";
+			intermediate[elsePos][3] = to_string(intermediate.size() + 1);
 		}
 	}
 	else if (node->subType == WHILE_t)
 	{
-		int startLine = Intermediate.size() + 1;
+		int startLine = intermediate.size() + 1;
 		formIntermediateCode(node->children[0]);
-		Intermediate.push_back("[IFNZ," + node->children[0]->strValue + ",_," + to_string(Intermediate.size() + 3) + "]\n");
-		Intermediate.push_back("JMP");
-		int jmpPos = Intermediate.size() - 1;
+		intermediate.push_back(formLine("IFNZ", node->children[0]->strValue, "_", to_string(intermediate.size() + 3)));
+		intermediate.push_back(formLine("JMP", "_", "_", "_"));
+		int jmpPos = intermediate.size() - 1;
 		formIntermediateCode(node->children[1]);
-		Intermediate.push_back("[JMP,_,_," + to_string(startLine) + "]\n");
-		Intermediate[jmpPos] = "[JMP,_,_," + to_string(Intermediate.size() + 1) + "]\n";
+		intermediate.push_back(formLine("JMP", "_", "_", to_string(startLine)));
+		intermediate[jmpPos][3] = to_string(intermediate.size() + 1);
 	}
 	else if (node->subType == FOR_t)
 	{
 		formIntermediateCode(node->children[0]);
-		int startLine = Intermediate.size() + 1;
+		int startLine = intermediate.size() + 1;
 		formIntermediateCode(node->children[1]);
-		Intermediate.push_back("[IFNZ," + node->children[1]->strValue + ",_," + to_string(Intermediate.size() + 3) + "]\n");
-		Intermediate.push_back("JMP");
-		int jmpPos = Intermediate.size() - 1;
+		intermediate.push_back(formLine("IFNZ", node->children[0]->strValue, "_", to_string(intermediate.size() + 3)));
+		intermediate.push_back(formLine("JMP", "_", "_", "_"));
+		int jmpPos = intermediate.size() - 1;
 		formIntermediateCode(node->children[3]);
 		formIntermediateCode(node->children[2]);
-		Intermediate.push_back("[JMP,_,_," + to_string(startLine) + "]\n");
-		Intermediate[jmpPos] = "[JMP,_,_," + to_string(Intermediate.size() + 1) + "]\n";
+		intermediate.push_back(formLine("JMP", "_", "_", to_string(startLine)));
+		intermediate[jmpPos][3] = to_string(intermediate.size() + 1);
 	}
 	else
 		for (int i = 0; i < node->children.size(); i++)
@@ -440,7 +556,7 @@ void formIntermediateCode(Node *node)
 
 void showGrammerTreeNode(Node *node, int depth)
 {
-	// cout << "(" << node->lineno << ")";
+	cout << "(" << node->lineno << ")";
 	for (int i = 0; i < depth; i++)
 		cout << "-";
 	cout << ">";
@@ -483,7 +599,7 @@ void showGrammerTreeNode(Node *node, int depth)
 		}
 		case CALL_t:
 		{
-			cout << ">CALL" + node->strValue;
+			cout << ">CALL";
 			break;
 		}
 		case RET_t:
@@ -747,10 +863,8 @@ void showTree(Node *node)
 	if (!funcNodes.empty())
 		cout << "====== FUNCTIONS ======" << endl;
 	for (int i = 0; i < funcNodes.size(); i++)
-	{
 		cout << funcNodes[i]->id << "     " << (long long)funcNodes[i] << endl;
-	}
-	cout << "====== IntermediateCODE ======" << endl;
-	for (int i = 0; i < Intermediate.size(); i++)
-		cout << i + 1 << " " << Intermediate[i];
+	cout << "====== IntermediateCode ======" << endl;
+	for (int i = 0; i < intermediate.size(); i++)
+		cout << i + 1 << " (" + intermediate[i][0] + "," + intermediate[i][1] + "," + intermediate[i][2] + "," + intermediate[i][3] + ")" << endl;
 }

@@ -1,37 +1,40 @@
+[error] Undefined error in line 1
+Use do_it before declare.
+1
 ====== GRAMMER TREE ======
-->ROOT
--->Function|Int
---->ID:do_it
---->Parameters: 
----->n|INTINT*
---->Statement>COMPOUND
----->Statement>RET
------>Expression
------->ID:n
------->Operator> % 
------->Number:2
--->EntryPoint
---->Statement>COMPOUND
----->Statement>CALLtemp2
------>ID:printf
------>Arguments: 
------->String:"%d"
------->Statement>CALLtemp1
-------->ID:do_it
-------->Arguments: 
--------->Number:5
----->Statement>RET
------>Number:0
+(10)->ROOT
+(4)-->Function|Int
+(1)--->ID:do_it
+(4)--->Parameters: 
+(1)---->n|INTINT*
+(4)--->Statement>COMPOUND
+(3)---->Statement>RET
+(3)----->Expression
+(3)------>ID:n
+(3)------>Operator> % 
+(3)------>Number:2
+(10)-->EntryPoint
+(10)--->Statement>COMPOUND
+(8)---->Statement>CALL
+(8)----->ID:printf
+(8)----->Arguments: 
+(8)------>String:"%d"
+(8)------>Statement>CALL
+(8)------->ID:do_it
+(8)------->Arguments: 
+(8)-------->Number:5
+(9)---->Statement>RET
+(9)----->Number:0
 ====== LEX RESULT ======
 INT
-ID do_it 5307919936
+ID do_it 5375028800
 LBS
 INT
-ID n 5307922464
+ID n 5375031328
 RBS
 LP
 RETURN
-ID n 5307922464
+ID n 5375031328
 OP_MOD
 NUMBER 2
 SEMI
@@ -44,7 +47,7 @@ LP
 ID printf ~
 LBS
 COMMA
-ID do_it 5307919936
+ID do_it 5375028800
 LBS
 NUMBER 5
 RBS
@@ -55,14 +58,14 @@ NUMBER 0
 SEMI
 RP
 ====== SYMBOL TABLE ======
-INT n     5307922464
+INT n     5375031328
 ====== FUNCTIONS ======
-do_it     5307922016
-====== IntermediateCODE ======
-1 [FUNC,do_it,{5307922464(n),},_]
-2 [%,5307922464(n),2,temp0]
-3 [RET,temp0,_,_]
-4 [ENDF,do_it,_,_]
-5 [CALL,do_it,{5,},temp1]
-6 [CALL,printf,{"%d",temp1,},temp2]
-7 [RET,0,_,_]
+do_it     5375030880
+====== IntermediateCode ======
+1 (FUNC,do_it,{5375031328(n),},_)
+2 (%,5375031328(n),2,temp0)
+3 (RET,temp0,_,_)
+4 (ENDF,do_it,_,_)
+5 (CALL,do_it,{5,},temp1)
+6 (CALL,printf,{"%d",temp1,},temp2)
+7 (RET,0,_,_)

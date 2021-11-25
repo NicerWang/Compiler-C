@@ -461,7 +461,11 @@ expr: expr OP_ADD expr
 ;
 
 factor: id {$$ = $1;}
-| num {$$ = $1;}
+| num 
+{
+	$$ = $1;
+	$$->symType = SYM_INT_t;
+}
 | call {$$ = $1;}
 | LBS expr RBS {$$ = $2;}
 ;

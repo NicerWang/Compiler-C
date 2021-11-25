@@ -80,6 +80,7 @@ public:
 	long long intValue;
 	string strValue;
 	int lineno;
+	SymType symType;
 	Node()
 	{
 		this->subType = NONE_t;

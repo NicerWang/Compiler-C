@@ -1,7 +1,7 @@
 int main()
 {
-    int a;
-    int b = 3;
+    int a = 0;
+    int b = a;
     printf("%d, %d\n", a, b);
     int *pa = &a;
     int *pb = &b;
