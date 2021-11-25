@@ -1,3 +1,4 @@
+====== GRAMMER TREE ======
 ->ROOT
 -->Function|Int
 --->ID:printf
@@ -31,7 +32,6 @@
 ---->Statement>CALLtemp1
 ----->ID:scanf
 ----->Arguments: 
-Parameters: 
 ------>String:"%d"
 ------>Expression
 ------->Operator> & 
@@ -39,7 +39,6 @@ Parameters:
 ---->Statement>CALLtemp4
 ----->ID:printf
 ----->Arguments: 
-Parameters: 
 ------>String:"%d\n"
 ------>Expression
 ------->Expression
@@ -84,7 +83,6 @@ Parameters:
 ---->Statement>CALLtemp10
 ----->ID:printf
 ----->Arguments: 
-Parameters: 
 ------>String:"%d\n"
 ------>Expression
 ------->Expression
@@ -182,7 +180,6 @@ Parameters:
 ---------->Statement>CALLtemp29
 ----------->ID:printf
 ----------->Arguments: 
-Parameters: 
 ------------>String:"1: %d\n"
 ------------>ID:i
 --------->Statement>IF
@@ -215,36 +212,33 @@ Parameters:
 ----------->Statement>CALLtemp37
 ------------>ID:printf
 ------------>Arguments: 
-Parameters: 
 ------------->String:"2: %d\n"
 ------------->ID:i
 ---------->Statement>COMPOUND
 ----------->Statement>CALLtemp38
 ------------>ID:printf
 ------------>Arguments: 
-Parameters: 
 ------------->String:"3: %d\n"
 ------------->ID:i
 ---->Statement>RET
 ----->Number:0
-====== GRAMMER TREE ======
 ====== LEX RESULT ======
 INT
-ID printf 5341474112
+ID printf 5039484448
 LBS
 RBS
 LP
 INT
-ID n 5341496528
+ID n 5039511664
 OP_ASSIGN
 NUMBER 5
 SEMI
 RETURN
-ID n 5341496528
+ID n 5039511664
 SEMI
 RP
 INT
-ID scanf 5341473360
+ID scanf 5039483568
 LBS
 RBS
 LP
@@ -258,27 +252,27 @@ LBS
 RBS
 LP
 INT
-ID m 5341496608
+ID m 5039511744
 OP_ASSIGN
 NUMBER 2
 SEMI
 INT
-ID n 5341496640
+ID n 5039512544
 OP_ASSIGN
 NUMBER 3
 SEMI
-ID scanf 5341473360
+ID scanf 5039483568
 LBS
 COMMA
 BIT_AND
-ID m 5341496608
+ID m 5039511744
 RBS
 SEMI
-ID printf 5341474112
+ID printf 5039484448
 LBS
 COMMA
 LBS
-ID m 5341496608
+ID m 5039511744
 OP_ADD
 NUMBER 100
 RBS
@@ -287,174 +281,174 @@ NUMBER 2
 RBS
 SEMI
 INT
-ID i 5341496672
+ID i 5039511808
 OP_ASSIGN
 NUMBER 0
 SEMI
 INT
-ID factorial 5341496736
+ID factorial 5039511888
 OP_ASSIGN
 NUMBER 3
 SEMI
 INT
-ID result 5341496768
+ID result 5039512160
 OP_ASSIGN
 NUMBER 1
 SEMI
 WHILE
 LBS
-ID factorial 5341496736
+ID factorial 5039511888
 GT
 NUMBER 0
 RBS
 LP
-ID result 5341496768
+ID result 5039512160
 OP_ASSIGN
-ID result 5341496768
+ID result 5039512160
 OP_MUL
-ID factorial 5341496736
+ID factorial 5039511888
 SEMI
-ID factorial 5341496736
+ID factorial 5039511888
 OP_ASSIGN
-ID factorial 5341496736
+ID factorial 5039511888
 OP_SUB
 NUMBER 1
 SEMI
 RP
-ID printf 5341474112
+ID printf 5039484448
 LBS
 COMMA
-ID result 5341496768
+ID result 5039512160
 OP_MOD
 NUMBER 100
 OP_SUB
 NUMBER 1
 RBS
 SEMI
-ID i 5341496672
+ID i 5039511808
 OP_PP
 SEMI
 FOR
 LBS
 INT
-ID j 5341496864
+ID j 5039513648
 OP_ASSIGN
 NUMBER 0
 SEMI
-ID result 5341496768
+ID result 5039512160
 OP_MOD
 NUMBER 100
 OP_SUB
 NUMBER 1
 SEMI
-ID j 5341496864
+ID j 5039513648
 OP_PP
 RBS
 LP
 FOR
 LBS
 INT
-ID k 5341496928
+ID k 5039512368
 OP_ASSIGN
-ID j 5341496864
+ID j 5039513648
 OP_ADD
 NUMBER 1
 SEMI
-ID k 5341496928
+ID k 5039512368
 LT
-ID result 5341496768
+ID result 5039512160
 OP_MOD
 NUMBER 100
 OP_SUB
 NUMBER 1
 SEMI
 OP_PP
-ID k 5341496928
+ID k 5039512368
 RBS
 LP
 IF
 LBS
-ID k 5341496928
+ID k 5039512368
 OP_SUB
 NUMBER 5
 EQ
-ID j 5341496864
+ID j 5039513648
 OR
 NOT
-ID j 5341496864
+ID j 5039513648
 OP_ADD
 NUMBER 2
 EQ
-ID k 5341496928
+ID k 5039512368
 AND
-ID k 5341496928
+ID k 5039512368
 OP_SUB
 NUMBER 3
 EQ
-ID j 5341496864
+ID j 5039513648
 RBS
 LP
 INT
-ID i 5341497056
+ID i 5039513168
 OP_ASSIGN
 NUMBER 0
 SEMI
-ID i 5341497056
+ID i 5039513168
 OP_ASSIGN
-ID k 5341496928
+ID k 5039512368
 OP_MOD
 LBS
-ID j 5341496864
+ID j 5039513648
 OP_ADD
 NUMBER 1
 RBS
 SEMI
-ID printf 5341474112
+ID printf 5039484448
 LBS
 COMMA
-ID i 5341497056
+ID i 5039513168
 RBS
 SEMI
 RP
 ELSE
 IF
 LBS
-ID k 5341496928
+ID k 5039512368
 EQ
-ID j 5341496864
+ID j 5039513648
 OP_ADD
 NUMBER 3
 AND
-ID k 5341496928
+ID k 5039512368
 OP_MOD
 NUMBER 2
 EQ
 NUMBER 0
 RBS
 LP
-ID i 5341496672
+ID i 5039511808
 OP_ASSIGN
-ID k 5341496928
+ID k 5039512368
 OP_DIV
 LBS
-ID j 5341496864
+ID j 5039513648
 OP_ADD
 NUMBER 1
 RBS
 SEMI
-ID printf 5341474112
+ID printf 5039484448
 LBS
 COMMA
-ID i 5341496672
+ID i 5039511808
 RBS
 SEMI
 RP
 ELSE
 LP
-ID printf 5341474112
+ID printf 5039484448
 LBS
 COMMA
-ID i 5341496672
+ID i 5039511808
 RBS
 SEMI
 RP
@@ -465,104 +459,104 @@ NUMBER 0
 SEMI
 RP
 ====== SYMBOL TABLE ======
-INT n     5341496528
-INT i     5341497056
-INT k     5341496928
-INT j     5341496864
-INT result     5341496768
-INT factorial     5341496736
-INT i     5341496672
-INT n     5341496640
-INT m     5341496608
+INT n     5039511664
+INT i     5039513168
+INT k     5039512368
+INT j     5039513648
+INT result     5039512160
+INT factorial     5039511888
+INT i     5039511808
+INT n     5039512544
+INT m     5039511744
 ====== FUNCTIONS ======
-printf     5341496432
-scanf     5341496560
+printf     5039511600
+scanf     5039512096
 ====== IntermediateCODE ======
-1 [FUNC,printf,{},]
-2 [DEC,n,5341496528, ]
-3 [=,5341496528(n),5,]
-4 [RET,5341496528(n),,]
-5 [ENDF,printf,,]
-6 [FUNC,scanf,{},]
-7 [RET,0,,]
-8 [ENDF,scanf,,]
-9 [DEC,m,5341496608, ]
-10 [=,5341496608(m),2,]
-11 [DEC,n,5341496640, ]
-12 [=,5341496640(n),3,]
-13 [&,5341496608(m),,temp0]
+1 [FUNC,printf,{},_]
+2 [DEC,n,5039511664,_]
+3 [=,5039511664(n),5,_]
+4 [RET,5039511664(n),_,_]
+5 [ENDF,printf,_,_]
+6 [FUNC,scanf,{},_]
+7 [RET,0,_,_]
+8 [ENDF,scanf,_,_]
+9 [DEC,m,5039511744,_]
+10 [=,5039511744(m),2,_]
+11 [DEC,n,5039512544,_]
+12 [=,5039512544(n),3,_]
+13 [&,5039511744(m),_,temp0]
 14 [CALL,scanf,{"%d",temp0,},temp1]
-15 [+,5341496608(m),100,temp2]
+15 [+,5039511744(m),100,temp2]
 16 [%,temp2,2,temp3]
 17 [CALL,printf,{"%d\n",temp3,},temp4]
-18 [DEC,i,5341496672, ]
-19 [=,5341496672(i),0,]
-20 [DEC,factorial,5341496736, ]
-21 [=,5341496736(factorial),3,]
-22 [DEC,result,5341496768, ]
-23 [=,5341496768(result),1,]
-24 [>,5341496736(factorial),0,temp5]
-25 [IFNZ,temp5,,27]
-26 [JMP,,,32]
-27 [*,5341496768(result),5341496736(factorial),temp6]
-28 [=,5341496768(result),temp6,]
-29 [-,5341496736(factorial),1,temp7]
-30 [=,5341496736(factorial),temp7,]
-31 [JMP,,,24]
-32 [%,5341496768(result),100,temp8]
+18 [DEC,i,5039511808,_]
+19 [=,5039511808(i),0,_]
+20 [DEC,factorial,5039511888,_]
+21 [=,5039511888(factorial),3,_]
+22 [DEC,result,5039512160,_]
+23 [=,5039512160(result),1,_]
+24 [>,5039511888(factorial),0,temp5]
+25 [IFNZ,temp5,_,27]
+26 [JMP,_,_,32]
+27 [*,5039512160(result),5039511888(factorial),temp6]
+28 [=,5039512160(result),temp6,_]
+29 [-,5039511888(factorial),1,temp7]
+30 [=,5039511888(factorial),temp7,_]
+31 [JMP,_,_,24]
+32 [%,5039512160(result),100,temp8]
 33 [-,temp8,1,temp9]
 34 [CALL,printf,{"%d\n",temp9,},temp10]
-35 [=,temp11,5341496672(i), ]
-36 [+,5341496672(i),1,5341496672(i)]
-37 [DEC,j,5341496864, ]
-38 [=,5341496864(j),0,]
-39 [%,5341496768(result),100,temp12]
+35 [=,temp11,5039511808(i),_]
+36 [+,5039511808(i),1,5039511808(i)]
+37 [DEC,j,5039513648,_]
+38 [=,5039513648(j),0,_]
+39 [%,5039512160(result),100,temp12]
 40 [-,temp12,1,temp13]
-41 [IFNZ,temp13,,43]
-42 [JMP,,,88]
-43 [DEC,k,5341496928, ]
-44 [+,5341496864(j),1,temp14]
-45 [=,5341496928(k),temp14,]
-46 [%,5341496768(result),100,temp15]
+41 [IFNZ,temp13,_,43]
+42 [JMP,_,_,88]
+43 [DEC,k,5039512368,_]
+44 [+,5039513648(j),1,temp14]
+45 [=,5039512368(k),temp14,_]
+46 [%,5039512160(result),100,temp15]
 47 [-,temp15,1,temp16]
-48 [<,5341496928(k),temp16,temp17]
-49 [IFNZ,temp17,,51]
-50 [JMP,,,85]
-51 [-,5341496928(k),5,temp18]
-52 [==,temp18,5341496864(j),temp19]
-53 [!,5341496864(j),,temp20]
+48 [<,5039512368(k),temp16,temp17]
+49 [IFNZ,temp17,_,51]
+50 [JMP,_,_,85]
+51 [-,5039512368(k),5,temp18]
+52 [==,temp18,5039513648(j),temp19]
+53 [!,5039513648(j),_,temp20]
 54 [+,temp20,2,temp21]
-55 [==,temp21,5341496928(k),temp22]
-56 [-,5341496928(k),3,temp23]
-57 [==,temp23,5341496864(j),temp24]
+55 [==,temp21,5039512368(k),temp22]
+56 [-,5039512368(k),3,temp23]
+57 [==,temp23,5039513648(j),temp24]
 58 [&&,temp22,temp24,temp25]
 59 [||,temp19,temp25,temp26]
-60 [IFNZ,temp26,,62]
-61 [JMP,,,69]
-62 [DEC,i,5341497056, ]
-63 [=,5341497056(i),0,]
-64 [+,5341496864(j),1,temp27]
-65 [%,5341496928(k),temp27,temp28]
-66 [=,5341497056(i),temp28,]
-67 [CALL,printf,{"1: %d\n",5341497056(i),},temp29]
-68 [JMP,,,82]
-69 [+,5341496864(j),3,temp30]
-70 [==,5341496928(k),temp30,temp31]
-71 [%,5341496928(k),2,temp32]
+60 [IFNZ,temp26,_,62]
+61 [JMP,_,_,69]
+62 [DEC,i,5039513168,_]
+63 [=,5039513168(i),0,_]
+64 [+,5039513648(j),1,temp27]
+65 [%,5039512368(k),temp27,temp28]
+66 [=,5039513168(i),temp28,_]
+67 [CALL,printf,{"1: %d\n",5039513168(i),},temp29]
+68 [JMP,_,_,82]
+69 [+,5039513648(j),3,temp30]
+70 [==,5039512368(k),temp30,temp31]
+71 [%,5039512368(k),2,temp32]
 72 [==,temp32,0,temp33]
 73 [&&,temp31,temp33,temp34]
-74 [IFNZ,temp34,,76]
-75 [JMP,,,81]
-76 [+,5341496864(j),1,temp35]
-77 [/,5341496928(k),temp35,temp36]
-78 [=,5341496672(i),temp36,]
-79 [CALL,printf,{"2: %d\n",5341496672(i),},temp37]
-80 [JMP,,,82]
-81 [CALL,printf,{"3: %d\n",5341496672(i),},temp38]
-82 [+,5341496928(k),1,5341496928(k)]
-83 [=,temp39,5341496928(k), ]
-84 [JMP,,,46]
-85 [=,temp40,5341496864(j), ]
-86 [+,5341496864(j),1,5341496864(j)]
-87 [JMP,,,39]
-88 [RET,0,,]
+74 [IFNZ,temp34,_,76]
+75 [JMP,_,_,81]
+76 [+,5039513648(j),1,temp35]
+77 [/,5039512368(k),temp35,temp36]
+78 [=,5039511808(i),temp36,_]
+79 [CALL,printf,{"2: %d\n",5039511808(i),},temp37]
+80 [JMP,_,_,82]
+81 [CALL,printf,{"3: %d\n",5039511808(i),},temp38]
+82 [+,5039512368(k),1,5039512368(k)]
+83 [=,temp39,5039512368(k),_]
+84 [JMP,_,_,46]
+85 [=,temp40,5039513648(j),_]
+86 [+,5039513648(j),1,5039513648(j)]
+87 [JMP,_,_,39]
+88 [RET,0,_,_]

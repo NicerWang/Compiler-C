@@ -6,6 +6,7 @@
 #define POST_SUB 4
 
 extern string lexRes;
+extern int yylineno;
 Node *root;
 
 vector<Symbol *> symbolTable;
@@ -28,6 +29,7 @@ Node *formNode(NodeType type, SubType subType = NONE_t)
 	Node *newNode = new Node();
 	newNode->type = type;
 	newNode->subType = subType;
+	newNode->lineno = yylineno;
 	return newNode;
 }
 
@@ -44,9 +46,9 @@ void preProcess(Node *node)
 {
 	if (node->type == STMT_t && node->subType == DECLARE_t)
 	{
-		string op = "";
-		string var1 = "";
-		string var2 = "";
+		string op = "_";
+		string var1 = "_";
+		string var2 = "_";
 		SymType type;
 		if (node->children[0]->subType == INT_t)
 		{
@@ -75,7 +77,7 @@ void preProcess(Node *node)
 		}
 		if (op != "")
 		{
-			Intermediate.push_back("[" + op + "," + var1 + "," + var2 + "," + " ]\n");
+			Intermediate.push_back("[" + op + "," + var1 + "," + var2 + ",_]\n");
 		}
 	}
 	if (node->type == VAR_t && node->subType == ID_t)
@@ -92,7 +94,13 @@ void preProcess(Node *node)
 	if (node->type == FUNC_t)
 	{
 		string arguments = "{";
-		funcNodes.push_back(formSymbol(node->children[0]->strValue, SYM_FUNC_t));
+		Symbol *func = formSymbol(node->children[0]->strValue, SYM_FUNC_t);
+
+		if (node->children[0]->subType == INT_t)
+			func->sub.push_back(SYM_INT_t);
+		else if (node->children[0]->subType == INT_STAR_t)
+			func->sub.push_back(SYM_INT_STAR_t);
+
 		while (lexRes.find(node->children[0]->strValue + " ~") != -1)
 		{
 			lexRes = lexRes.replace(lexRes.find(node->children[0]->strValue + " ~") + node->children[0]->strValue.length() + 1, 1, to_string((long long)node));
@@ -101,13 +109,15 @@ void preProcess(Node *node)
 		{
 			availNodesCnt++;
 			SymType type;
-			if (node->children[1]->children[i]->subType == INT_t)
+			if (node->children[1]->children[i]->intValue == INT_t)
 			{
 				type = SYM_INT_t;
+				func->sub.push_back(SYM_INT_t);
 			}
-			else if (node->children[1]->children[i]->subType == INT_STAR_t)
+			else if (node->children[1]->children[i]->intValue == INT_STAR_t)
 			{
 				type = SYM_INT_STAR_t;
+				func->sub.push_back(SYM_INT_STAR_t);
 			}
 			availNodes.push_back(formSymbol(node->children[1]->children[i]->strValue, type));
 			int k;
@@ -115,19 +125,20 @@ void preProcess(Node *node)
 				if (availNodes[k]->id == node->children[1]->children[k]->strValue)
 					break;
 			arguments += to_string((long long)availNodes[k]) + "(" + node->children[1]->children[i]->strValue + "),";
-			lexRes = lexRes.replace(lexRes.find(node->children[1]->children[i]->strValue + " ~") + node->children[1]->children[i]->strValue.length() + 1, 1, to_string((long long)node->children[1]->children[i]));
+			lexRes = lexRes.replace(lexRes.find(node->children[1]->children[i]->strValue + " ~") + node->children[1]->children[i]->strValue.length() + 1, 1, to_string((long long)availNodes[k]));
 		}
+		funcNodes.push_back(func);
 		arguments += "}";
-		Intermediate.push_back("[FUNC," + node->children[0]->strValue + "," + arguments + ",]\n");
+		Intermediate.push_back("[FUNC," + node->children[0]->strValue + "," + arguments + ",_]\n");
 	}
 }
 
 void postProcess(Node *node)
 {
-	string op = "";
-	string var1 = "";
-	string var2 = "";
-	string ret = "";
+	string op = "_";
+	string var1 = "_";
+	string var2 = "_";
+	string ret = "_";
 	int preOrPost = 0;
 
 	if (node->type == EXPR_t)
@@ -136,7 +147,7 @@ void postProcess(Node *node)
 		{
 			if (node->children[i]->type == EXPR_t)
 			{
-				if (var1.size() == 0)
+				if (var1 == "_")
 					var1 = node->children[i]->strValue;
 				else
 					var2 = node->children[i]->strValue;
@@ -145,7 +156,7 @@ void postProcess(Node *node)
 			{
 				if (node->children[i]->subType == NUMBER_t)
 				{
-					if (var1.size() == 0)
+					if (var1 == "_")
 						var1 = to_string(node->children[i]->intValue);
 					else
 						var2 = to_string(node->children[i]->intValue);
@@ -156,7 +167,7 @@ void postProcess(Node *node)
 					for (j = availNodes.size() - 1; j >= 0; j--)
 						if (availNodes[j]->id == node->children[i]->strValue)
 							break;
-					if (var1.size() == 0)
+					if (var1 == "_")
 						var1 = to_string((long long)availNodes[j]) + "(" + availNodes[j]->id + ")";
 					else
 						var2 = to_string((long long)availNodes[j]) + "(" + availNodes[j]->id + ")";
@@ -168,9 +179,6 @@ void postProcess(Node *node)
 				{
 				case OP_ADD_t:
 					op = "+";
-					break;
-				case OP_ADDRESS_t:
-					op = "&";
 					break;
 				case OP_PP_t:
 				{
@@ -195,6 +203,9 @@ void postProcess(Node *node)
 					break;
 				case OP_MUL_t:
 					op = "*";
+					break;
+				case OP_ADDRESS_t:
+					op = "&";
 					break;
 				case OP_DIV_t:
 					op = "/";
@@ -350,13 +361,13 @@ void postProcess(Node *node)
 	{
 		Intermediate.push_back("[-," + var1 + ",1," + var1 + "]\n");
 	}
-	if (op.size() != 0 && preOrPost == 0)
+	if (op != "_" && preOrPost == 0)
 	{
 		Intermediate.push_back("[" + op + "," + var1 + "," + var2 + "," + ret + "]\n");
 	}
 	if (preOrPost != 0)
 	{
-		Intermediate.push_back("[=," + ret + "," + var1 + ", ]\n");
+		Intermediate.push_back("[=," + ret + "," + var1 + ",_]\n");
 	}
 	if (preOrPost == POST_PLUS)
 	{
@@ -370,48 +381,48 @@ void postProcess(Node *node)
 
 void formIntermediateCode(Node *node)
 {
-	preProcess(node);
 	int blockVarCnt = availNodesCnt;
+	preProcess(node);
 	if (node->subType == IF_t)
 	{
 		formIntermediateCode(node->children[0]);
-		Intermediate.push_back("[IFNZ," + node->children[0]->strValue + ",," + to_string(Intermediate.size() + 3) + "]\n");
+		Intermediate.push_back("[IFNZ," + node->children[0]->strValue + ",_," + to_string(Intermediate.size() + 3) + "]\n");
 		Intermediate.push_back("JMP");
 		int jmpPos = Intermediate.size() - 1;
 		formIntermediateCode(node->children[1]);
 		if (node->children.size() > 2)
 			Intermediate.push_back("JMP");
 		int elsePos = Intermediate.size() - 1;
-		Intermediate[jmpPos] = "[JMP,,," + to_string(Intermediate.size() + 1) + "]\n";
+		Intermediate[jmpPos] = "[JMP,_,_," + to_string(Intermediate.size() + 1) + "]\n";
 		if (node->children.size() > 2)
 		{
 			formIntermediateCode(node->children[2]);
-			Intermediate[elsePos] = "[JMP,,," + to_string(Intermediate.size() + 1) + "]\n";
+			Intermediate[elsePos] = "[JMP,_,_," + to_string(Intermediate.size() + 1) + "]\n";
 		}
 	}
 	else if (node->subType == WHILE_t)
 	{
 		int startLine = Intermediate.size() + 1;
 		formIntermediateCode(node->children[0]);
-		Intermediate.push_back("[IFNZ," + node->children[0]->strValue + ",," + to_string(Intermediate.size() + 3) + "]\n");
+		Intermediate.push_back("[IFNZ," + node->children[0]->strValue + ",_," + to_string(Intermediate.size() + 3) + "]\n");
 		Intermediate.push_back("JMP");
 		int jmpPos = Intermediate.size() - 1;
 		formIntermediateCode(node->children[1]);
-		Intermediate.push_back("[JMP,,," + to_string(startLine) + "]\n");
-		Intermediate[jmpPos] = "[JMP,,," + to_string(Intermediate.size() + 1) + "]\n";
+		Intermediate.push_back("[JMP,_,_," + to_string(startLine) + "]\n");
+		Intermediate[jmpPos] = "[JMP,_,_," + to_string(Intermediate.size() + 1) + "]\n";
 	}
 	else if (node->subType == FOR_t)
 	{
 		formIntermediateCode(node->children[0]);
 		int startLine = Intermediate.size() + 1;
 		formIntermediateCode(node->children[1]);
-		Intermediate.push_back("[IFNZ," + node->children[1]->strValue + ",," + to_string(Intermediate.size() + 3) + "]\n");
+		Intermediate.push_back("[IFNZ," + node->children[1]->strValue + ",_," + to_string(Intermediate.size() + 3) + "]\n");
 		Intermediate.push_back("JMP");
 		int jmpPos = Intermediate.size() - 1;
 		formIntermediateCode(node->children[3]);
 		formIntermediateCode(node->children[2]);
-		Intermediate.push_back("[JMP,,," + to_string(startLine) + "]\n");
-		Intermediate[jmpPos] = "[JMP,,," + to_string(Intermediate.size() + 1) + "]\n";
+		Intermediate.push_back("[JMP,_,_," + to_string(startLine) + "]\n");
+		Intermediate[jmpPos] = "[JMP,_,_," + to_string(Intermediate.size() + 1) + "]\n";
 	}
 	else
 		for (int i = 0; i < node->children.size(); i++)
@@ -429,6 +440,7 @@ void formIntermediateCode(Node *node)
 
 void showGrammerTreeNode(Node *node, int depth)
 {
+	// cout << "(" << node->lineno << ")";
 	for (int i = 0; i < depth; i++)
 		cout << "-";
 	cout << ">";
@@ -661,8 +673,8 @@ void showGrammerTreeNode(Node *node, int depth)
 			cout << "Arguments: " << endl;
 			break;
 		}
-		break;
 		}
+		break;
 	}
 	case PARAM_t:
 	{
@@ -676,6 +688,10 @@ void showGrammerTreeNode(Node *node, int depth)
 			case INT_t:
 			{
 				cout << "INT";
+			}
+			case INT_STAR_t:
+			{
+				cout << "INT*";
 			}
 			}
 			cout << endl;
@@ -714,18 +730,18 @@ void grammerTreeDfs(Node *node, int depth)
 void showTree(Node *node)
 {
 	formIntermediateCode(root);
-	grammerTreeDfs(root, 1);
 	cout << "====== GRAMMER TREE ======" << endl;
+	grammerTreeDfs(root, 1);
 	cout << "====== LEX RESULT ======" << endl;
 	cout << lexRes;
 	if (!symbolTable.empty())
 		cout << "====== SYMBOL TABLE ======" << endl;
 	for (int i = 0; i < symbolTable.size(); i++)
 	{
-		if (symbolTable[i]->type == SYM_INT_t)
-			cout << "INT ";
 		if (symbolTable[i]->type == SYM_INT_STAR_t)
 			cout << "INT* ";
+		else if (symbolTable[i]->type == SYM_INT_t)
+			cout << "INT ";
 		cout << symbolTable[i]->id << "     " << (long long)symbolTable[i] << endl;
 	}
 	if (!funcNodes.empty())

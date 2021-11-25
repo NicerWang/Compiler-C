@@ -68,6 +68,7 @@ public:
 	string id;
 	SymType type;
 	int value;
+	vector<SymType> sub;
 };
 
 class Node
@@ -76,8 +77,9 @@ public:
 	NodeType type;
 	SubType subType;
 	vector<Node *> children;
-	int intValue;
+	long long intValue;
 	string strValue;
+	int lineno;
 	Node()
 	{
 		this->subType = NONE_t;

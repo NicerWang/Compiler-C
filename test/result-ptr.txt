@@ -1,3 +1,4 @@
+====== GRAMMER TREE ======
 ->ROOT
 -->EntryPoint
 --->Statement>COMPOUND
@@ -12,7 +13,6 @@
 ---->Statement>CALLtemp0
 ----->ID:printf
 ----->Arguments: 
-Parameters: 
 ------>String:"%d, %d\n"
 ------>ID:a
 ------>ID:b
@@ -52,13 +52,11 @@ Parameters:
 ---->Statement>CALLtemp5
 ----->ID:printf
 ----->Arguments: 
-Parameters: 
 ------>String:"%d, %d\n"
 ------>ID:a
 ------>ID:b
 ---->Statement>RET
 ----->Number:0
-====== GRAMMER TREE ======
 ====== LEX RESULT ======
 INT
 MAIN
@@ -66,58 +64,58 @@ LBS
 RBS
 LP
 INT
-ID a 5307925216
+ID a 5727357200
 SEMI
 INT
-ID b 5307925568
+ID b 5727357264
 OP_ASSIGN
 NUMBER 3
 SEMI
 ID printf ~
 LBS
 COMMA
-ID a 5307925216
+ID a 5727357200
 COMMA
-ID b 5307925568
+ID b 5727357264
 RBS
 SEMI
 INT
 OP_MUL
-ID pa 5307925248
+ID pa 5727357488
 OP_ASSIGN
 BIT_AND
-ID a 5307925216
+ID a 5727357200
 SEMI
 INT
 OP_MUL
-ID pb 5307925600
+ID pb 5727357360
 OP_ASSIGN
 BIT_AND
-ID b 5307925568
+ID b 5727357264
 SEMI
 INT
-ID t 5307925968
+ID t 5727357552
 OP_ASSIGN
 OP_MUL
-ID pb 5307925600
+ID pb 5727357360
 SEMI
 OP_MUL
-ID pb 5307925600
+ID pb 5727357360
 OP_ASSIGN
 OP_MUL
-ID pa 5307925248
+ID pa 5727357488
 SEMI
 OP_MUL
-ID pa 5307925248
+ID pa 5727357488
 OP_ASSIGN
-ID t 5307925968
+ID t 5727357552
 SEMI
 ID printf ~
 LBS
 COMMA
-ID a 5307925216
+ID a 5727357200
 COMMA
-ID b 5307925568
+ID b 5727357264
 RBS
 SEMI
 RETURN
@@ -125,27 +123,27 @@ NUMBER 0
 SEMI
 RP
 ====== SYMBOL TABLE ======
-INT t     5307925968
-INT* pb     5307925600
-INT* pa     5307925248
-INT b     5307925568
-INT a     5307925216
+INT t     5727357552
+INT* pb     5727357360
+INT* pa     5727357488
+INT b     5727357264
+INT a     5727357200
 ====== IntermediateCODE ======
-1 [DEC,a,5307925216, ]
-2 [DEC,b,5307925568, ]
-3 [=,5307925568(b),3,]
-4 [CALL,printf,{"%d, %d\n",5307925216(a),5307925568(b),},temp0]
-5 [DEC,pa,5307925248, ]
-6 [&,5307925216(a),,temp1]
-7 [=,5307925248(pa),temp1,]
-8 [DEC,pb,5307925600, ]
-9 [&,5307925568(b),,temp2]
-10 [=,5307925600(pb),temp2,]
-11 [DEC,t,5307925968, ]
-12 [*,5307925600(pb),,temp3]
-13 [=,5307925968(t),temp3,]
-14 [*,5307925248(pa),,temp4]
-15 [&=,5307925600(pb),temp4,]
-16 [&=,5307925248(pa),5307925968(t),]
-17 [CALL,printf,{"%d, %d\n",5307925216(a),5307925568(b),},temp5]
-18 [RET,0,,]
+1 [DEC,a,5727357200,_]
+2 [DEC,b,5727357264,_]
+3 [=,5727357264(b),3,_]
+4 [CALL,printf,{"%d, %d\n",5727357200(a),5727357264(b),},temp0]
+5 [DEC,pa,5727357488,_]
+6 [&,5727357200(a),_,temp1]
+7 [=,5727357488(pa),temp1,_]
+8 [DEC,pb,5727357360,_]
+9 [&,5727357264(b),_,temp2]
+10 [=,5727357360(pb),temp2,_]
+11 [DEC,t,5727357552,_]
+12 [*,5727357360(pb),_,temp3]
+13 [=,5727357552(t),temp3,_]
+14 [*,5727357488(pa),_,temp4]
+15 [&=,5727357360(pb),temp4,_]
+16 [&=,5727357488(pa),5727357552(t),_]
+17 [CALL,printf,{"%d, %d\n",5727357200(a),5727357264(b),},temp5]
+18 [RET,0,_,_]

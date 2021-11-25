@@ -8,6 +8,8 @@ extern int yylex(void);
 
 extern int yyparse(void); 
 
+extern int yylineno;
+
 int yywrap()
 {
 	return 1;
@@ -15,7 +17,7 @@ int yywrap()
 
 void yyerror(const char *s)
 {
-	printf("[error] %s\n", s);
+	printf("[error] Info:%s\n[error] Line: %d\n", s, yylineno);
 }
 
 int main()
@@ -25,7 +27,7 @@ int main()
 }
 %}
 
-%token INT WHILE FOR IF ELSE MAIN
+%token INT WHILE FOR IF ELSE MAIN INVALID
 %token LT LE GT GE EQ NE
 %token OP_ASSIGN RETURN
 %token SEMI COMMA LBS RBS LP RP LBT RBT

@@ -8,6 +8,7 @@ extern string lexRes;
 
 
 %}
+%option yylineno
 
 delim [ \t\n]
 ws {delim}+
@@ -18,6 +19,7 @@ number {digit}
 inlineNote \/\/[^\n]*
 multiNote "/*"[^*]*[*]+([^*/][^*]*[*]+)*[*]*"/"
 string \".*\"
+invalid .
 
 %%
 "main"      lexRes += "MAIN\n";return MAIN;
@@ -80,5 +82,8 @@ string \".*\"
                 yylval.node = new Node();
                 yylval.node->strValue = yytext;
                 return STR;
+            }
+{invalid}   {
+                return INVALID;
             }
 %%
