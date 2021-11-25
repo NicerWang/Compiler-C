@@ -40,9 +40,9 @@ vector<string> formLine(string op, string var1, string var2, string ret)
 
 void undefinedError(Node *node, string op)
 {
-
 	cout << "[error] Undefined error in line " << node->lineno << endl;
 	cout << "Use " + op + " before declare." << endl;
+	cout << "Ignore Line " << throwLine << "." << endl;
 }
 
 void typeCheck(Node *node, SymType type, string op)
@@ -125,20 +125,30 @@ void preProcess(Node *node)
 	{
 		if (node->strValue == "printf" || node->strValue == "scanf")
 			return;
+		bool isFunc = false;
+		bool isVar = false;
+		for (int i = funcNodes.size() - 1; i >= 0; i--)
+		{
+			if (funcNodes[i]->id == node->strValue)
+			{
+				isFunc = true;
+				break;
+			}
+		}
 		for (int i = availNodesCnt - 1; i >= 0; i--)
 		{
 			if (availNodes[i]->id == node->strValue)
 			{
 				lexRes = lexRes.replace(lexRes.find(node->strValue + " ~") + node->strValue.length() + 1, 1, to_string((long long)availNodes[i]));
 				node->symType = availNodes[i]->type;
+				isVar = true;
 				break;
 			}
-			if (i == 0)
-			{
-				undefinedError(node, node->strValue);
-				throwLine = node->lineno;
-				cout << throwLine << endl;
-			}
+		}
+		if (!isFunc && !isVar)
+		{
+			throwLine = node->lineno;
+			undefinedError(node, node->strValue);
 		}
 	}
 	if (node->type == FUNC_t)
@@ -422,6 +432,7 @@ void postProcess(Node *node)
 				var1 = to_string((long long)availNodes[i]) + "(" + target + ")";
 			}
 		}
+		node->symType = node->children[0]->symType;
 	}
 	else if (node->type == STMT_t && node->subType == CALL_t)
 	{
@@ -430,6 +441,33 @@ void postProcess(Node *node)
 		node->strValue = ret;
 		var1 = node->children[0]->strValue;
 		var2 = "{";
+		int idx;
+		for (idx = 0; idx < funcNodes.size(); idx++)
+		{
+			if (var1 == funcNodes[idx]->id)
+			{
+				break;
+			}
+		}
+		if (var1 != "printf" && var1 != "scanf")
+		{
+			if (funcNodes[idx]->sub.size() != node->children[1]->children.size())
+			{
+				cout << "[error]Wrong function call in line " << node->lineno << endl;
+				cout << "Different number of arguments in defination and call of " + var1 << endl;
+				exit(-1);
+			}
+			for (int i = 0; i < node->children[1]->children.size(); i++)
+			{
+				if (funcNodes[idx]->sub[i] != node->children[1]->children[i]->symType)
+				{
+					cout << "[error]Wrong function call in line " << node->lineno << endl;
+					cout << "Different type of No." + to_string(i) + " argument in defination and call of " + var1 << endl;
+					exit(-1);
+				}
+			}
+		}
+
 		for (int i = 0; i < node->children[1]->children.size(); i++)
 		{
 			if (node->children[1]->children[i]->type == EXPR_t || node->children[1]->children[i]->subType == CALL_t)
@@ -461,6 +499,23 @@ void postProcess(Node *node)
 	}
 	else if (node->type == FUNC_t)
 	{
+		for (int i = 0; i < node->children[2]->children.size(); i++)
+		{
+			if (node->children[2]->children[i]->subType == RET_t)
+			{
+				SymType funcType;
+				if (node->subType == INT_t)
+					funcType = SYM_INT_t;
+				else if (node->subType == INT_STAR_t)
+					funcType = SYM_INT_STAR_t;
+				if (node->children[2]->children[i]->symType != funcType)
+				{
+					cout << "[error]Wrong Return Statement in line " << node->children[2]->children[i]->lineno << endl;
+					cout << "Return value of " + node->children[0]->strValue + " do not match" << endl;
+					exit(-1);
+				}
+			}
+		}
 		op = "ENDF";
 		var1 = node->children[0]->strValue;
 	}
@@ -543,7 +598,8 @@ void formIntermediateCode(Node *node)
 	else
 		for (int i = 0; i < node->children.size(); i++)
 			formIntermediateCode(node->children[i]);
-
+	if (node->lineno == throwLine)
+		return;
 	postProcess(node);
 	if ((node->type == STMT_t && (node->subType == FOR_t || node->subType == COMPOUND_t)) || node->type == FUNC_t)
 		while (availNodesCnt > blockVarCnt)
@@ -556,7 +612,6 @@ void formIntermediateCode(Node *node)
 
 void showGrammerTreeNode(Node *node, int depth)
 {
-	cout << "(" << node->lineno << ")";
 	for (int i = 0; i < depth; i++)
 		cout << "-";
 	cout << ">";
@@ -564,7 +619,7 @@ void showGrammerTreeNode(Node *node, int depth)
 	{
 	case ROOT_t:
 	{
-		cout << "ROOT" << endl;
+		cout << "ROOT";
 		break;
 	}
 	case STMT_t:
@@ -613,7 +668,6 @@ void showGrammerTreeNode(Node *node, int depth)
 			break;
 		}
 		}
-		cout << endl;
 		break;
 	}
 	case VAR_t:
@@ -622,22 +676,22 @@ void showGrammerTreeNode(Node *node, int depth)
 		{
 		case NUMBER_t:
 		{
-			cout << "Number:" << node->intValue << endl;
+			cout << "Number:" << node->intValue;
 			break;
 		}
 		case ID_t:
 		{
-			cout << "ID:" + node->strValue << endl;
+			cout << "ID:" + node->strValue;
 			break;
 		}
 		case STRING_t:
 		{
-			cout << "String:" + node->strValue << endl;
+			cout << "String:" + node->strValue;
 			break;
 		}
 		case LEFT_VALUE_t:
 		{
-			cout << "Left Value:" << endl;
+			cout << "Left Value:";
 		}
 		}
 		break;
@@ -649,87 +703,87 @@ void showGrammerTreeNode(Node *node, int depth)
 		{
 		case OP_ADDRESS_t:
 		{
-			cout << "> & " << endl;
+			cout << "> & ";
 			break;
 		}
 		case OP_MM_t:
 		{
-			cout << "> -- " << endl;
+			cout << "> -- ";
 			break;
 		}
 		case OP_PP_t:
 		{
-			cout << "> ++ " << endl;
+			cout << "> ++ ";
 			break;
 		}
 		case OP_ADD_t:
 		{
-			cout << "> + " << endl;
+			cout << "> + ";
 			break;
 		}
 		case OP_SUB_t:
 		{
-			cout << "> - " << endl;
+			cout << "> - ";
 			break;
 		}
 		case OR_t:
 		{
-			cout << "> || " << endl;
+			cout << "> || ";
 			break;
 		}
 		case AND_t:
 		{
-			cout << "> && " << endl;
+			cout << "> && ";
 			break;
 		}
 		case NOT_t:
 		{
-			cout << "> ! " << endl;
+			cout << "> ! ";
 			break;
 		}
 		case OP_MUL_t:
 		{
-			cout << "> * " << endl;
+			cout << "> * ";
 			break;
 		}
 		case OP_DIV_t:
 		{
-			cout << "> / " << endl;
+			cout << "> / ";
 			break;
 		}
 		case OP_MOD_t:
 		{
-			cout << "> % " << endl;
+			cout << "> % ";
 			break;
 		}
 		case LT_t:
 		{
-			cout << "> < " << endl;
+			cout << "> < ";
 			break;
 		}
 		case LE_t:
 		{
-			cout << "> <= " << endl;
+			cout << "> <= ";
 			break;
 		}
 		case GT_t:
 		{
-			cout << "> > " << endl;
+			cout << "> > ";
 			break;
 		}
 		case GE_t:
 		{
-			cout << "> >= " << endl;
+			cout << "> >= ";
 			break;
 		}
 		case EQ_t:
 		{
-			cout << "> == " << endl;
+			cout << "> == ";
 			break;
 		}
 		case NE_t:
 		{
-			cout << "> != " << endl;
+			cout << "> != ";
 			break;
 		}
 		}
@@ -742,12 +796,12 @@ void showGrammerTreeNode(Node *node, int depth)
 		{
 		case INT_t:
 		{
-			cout << "|Int" << endl;
+			cout << "|Int";
 			break;
 		}
 		case INT_STAR_t:
 		{
-			cout << "|Int*" << endl;
+			cout << "|Int*";
 			break;
 		}
 		}
@@ -755,7 +809,7 @@ void showGrammerTreeNode(Node *node, int depth)
 	}
 	case MAIN_t:
 	{
-		cout << "EntryPoint" << endl;
+		cout << "EntryPoint";
 		break;
 	}
 	case TYPE_t:
@@ -764,12 +818,12 @@ void showGrammerTreeNode(Node *node, int depth)
 		{
 		case INT_t:
 		{
-			cout << "Type: Int" << endl;
+			cout << "Type: Int";
 			break;
 		}
 		case INT_STAR_t:
 		{
-			cout << "Type: Int Pointer:" + node->strValue << endl;
+			cout << "Type: Int Pointer:" + node->strValue;
 			break;
 		}
 		}
@@ -781,12 +835,12 @@ void showGrammerTreeNode(Node *node, int depth)
 		{
 		case SINGLE_t:
 		{
-			cout << node->strValue << endl;
+			cout << node->strValue;
 			break;
 		}
 		case TOTAL_t:
 		{
-			cout << "Arguments: " << endl;
+			cout << "Arguments: ";
 			break;
 		}
 		}
@@ -804,18 +858,19 @@ void showGrammerTreeNode(Node *node, int depth)
 			case INT_t:
 			{
 				cout << "INT";
+				break;
 			}
 			case INT_STAR_t:
 			{
 				cout << "INT*";
+				break;
 			}
 			}
-			cout << endl;
 			break;
 		}
 		case TOTAL_t:
 		{
-			cout << "Parameters: " << endl;
+			cout << "Parameters: ";
 			break;
 		}
 		}
@@ -823,14 +878,14 @@ void showGrammerTreeNode(Node *node, int depth)
 	}
 	case EXPR_t:
 	{
-		cout << "Expression" << endl;
+		cout << "Expression";
 		break;
 	}
 	default:
 	{
-		cout << endl;
 	}
 	}
+	cout << "(" << node->lineno << ")" << endl;
 	return;
 }
 
