@@ -87,9 +87,6 @@ void preProcess(Node *node)
 {
 	if (node->type == STMT_t && node->subType == DECLARE_t)
 	{
-		string op = "_";
-		string var1 = "_";
-		string var2 = "_";
 		SymType type;
 		if (node->children[0]->subType == INT_t)
 		{
@@ -112,13 +109,6 @@ void preProcess(Node *node)
 				sym = formSymbol(node->children[i]->strValue, type);
 			}
 			availNodes.push_back(sym);
-			op = "DEC";
-			var1 = sym->id;
-			var2 = to_string((long long)availNodes[availNodes.size() - 1]);
-		}
-		if (op != "")
-		{
-			intermediate.push_back(formLine(op, var1, var2, "_"));
 		}
 	}
 	if (node->type == VAR_t && node->subType == ID_t)
@@ -184,7 +174,7 @@ void preProcess(Node *node)
 			for (k = availNodes.size() - 1; k >= 0; k--)
 				if (availNodes[k]->id == node->children[1]->children[k]->strValue)
 					break;
-			arguments += to_string((long long)availNodes[k]) + "(" + node->children[1]->children[i]->strValue + "),";
+			arguments += to_string((long long)availNodes[k]) + ",";
 			lexRes = lexRes.replace(lexRes.find(node->children[1]->children[i]->strValue + " ~") + node->children[1]->children[i]->strValue.length() + 1, 1, to_string((long long)availNodes[k]));
 		}
 		funcNodes.push_back(func);
@@ -229,9 +219,9 @@ void postProcess(Node *node)
 						if (availNodes[j]->id == node->children[i]->strValue)
 							break;
 					if (var1 == "_")
-						var1 = to_string((long long)availNodes[j]) + "(" + availNodes[j]->id + ")";
+						var1 = "#" + to_string((long long)availNodes[j]);
 					else
-						var2 = to_string((long long)availNodes[j]) + "(" + availNodes[j]->id + ")";
+						var2 = "#" + to_string((long long)availNodes[j]);
 				}
 			}
 			else if (node->children[i]->type == OP_t)
@@ -383,7 +373,7 @@ void postProcess(Node *node)
 			if (availNodes[i]->id == target)
 				break;
 
-		var1 = to_string((long long)availNodes[i]) + "(" + target + ")";
+		var1 = "#" + to_string((long long)availNodes[i]);
 
 		if (node->children[1]->symType != targetType)
 		{
@@ -405,7 +395,7 @@ void postProcess(Node *node)
 				for (k = availNodesCnt - 1; k >= 0; k--)
 					if (availNodes[k]->id == anotherTarget)
 						break;
-				var2 = to_string((long long)availNodes[k]) + "(" + anotherTarget + ")";
+				var2 = "#" + to_string((long long)availNodes[k]);
 			}
 		}
 	}
@@ -429,7 +419,7 @@ void postProcess(Node *node)
 					if (availNodes[i]->id == target)
 						break;
 				}
-				var1 = to_string((long long)availNodes[i]) + "(" + target + ")";
+				var1 = "#" + to_string((long long)availNodes[i]);
 			}
 		}
 		node->symType = node->children[0]->symType;
@@ -487,7 +477,7 @@ void postProcess(Node *node)
 						if (availNodes[k]->id == target)
 							break;
 					}
-					var2 += to_string((long long)availNodes[k]) + "(" + target + "),";
+					var2 += "#" + to_string((long long)availNodes[k]) + ",";
 				}
 				else
 				{
@@ -554,6 +544,8 @@ void formIntermediateCode(Node *node)
 	if (node->subType == IF_t)
 	{
 		formIntermediateCode(node->children[0]);
+		if (node->children[0]->strValue == "")
+			return;
 		intermediate.push_back(formLine("IFNZ", node->children[0]->strValue, "_", to_string(intermediate.size() + 3)));
 		intermediate.push_back(formLine("JMP", "_", "_", "_"));
 		int jmpPos = intermediate.size() - 1;
@@ -575,6 +567,8 @@ void formIntermediateCode(Node *node)
 	{
 		int startLine = intermediate.size() + 1;
 		formIntermediateCode(node->children[0]);
+		if (node->children[0]->strValue == "")
+			return;
 		intermediate.push_back(formLine("IFNZ", node->children[0]->strValue, "_", to_string(intermediate.size() + 3)));
 		intermediate.push_back(formLine("JMP", "_", "_", "_"));
 		int jmpPos = intermediate.size() - 1;
@@ -587,7 +581,9 @@ void formIntermediateCode(Node *node)
 		formIntermediateCode(node->children[0]);
 		int startLine = intermediate.size() + 1;
 		formIntermediateCode(node->children[1]);
-		intermediate.push_back(formLine("IFNZ", node->children[0]->strValue, "_", to_string(intermediate.size() + 3)));
+		if (node->children[1]->strValue == "")
+			return;
+		intermediate.push_back(formLine("IFNZ", node->children[1]->strValue, "_", to_string(intermediate.size() + 3)));
 		intermediate.push_back(formLine("JMP", "_", "_", "_"));
 		int jmpPos = intermediate.size() - 1;
 		formIntermediateCode(node->children[3]);
@@ -921,5 +917,7 @@ void showTree(Node *node)
 		cout << funcNodes[i]->id << "     " << (long long)funcNodes[i] << endl;
 	cout << "====== IntermediateCode ======" << endl;
 	for (int i = 0; i < intermediate.size(); i++)
+	{
 		cout << i + 1 << " (" + intermediate[i][0] + "," + intermediate[i][1] + "," + intermediate[i][2] + "," + intermediate[i][3] + ")" << endl;
+	}
 }

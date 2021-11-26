@@ -1,40 +1,37 @@
-[error] Undefined error in line 1
-Use do_it before declare.
-1
 ====== GRAMMER TREE ======
-(10)->ROOT
-(4)-->Function|Int
-(1)--->ID:do_it
-(4)--->Parameters: 
-(1)---->n|INTINT*
-(4)--->Statement>COMPOUND
-(3)---->Statement>RET
-(3)----->Expression
-(3)------>ID:n
-(3)------>Operator> % 
-(3)------>Number:2
-(10)-->EntryPoint
-(10)--->Statement>COMPOUND
-(8)---->Statement>CALL
-(8)----->ID:printf
-(8)----->Arguments: 
-(8)------>String:"%d"
-(8)------>Statement>CALL
-(8)------->ID:do_it
-(8)------->Arguments: 
-(8)-------->Number:5
-(9)---->Statement>RET
-(9)----->Number:0
+->ROOT(10)
+-->Function|Int(4)
+--->ID:do_it(1)
+--->Parameters: (4)
+---->n|INT(1)
+--->Statement>COMPOUND(4)
+---->Statement>RET(3)
+----->Expression(3)
+------>ID:n(3)
+------>Operator> % (3)
+------>Number:2(3)
+-->EntryPoint(10)
+--->Statement>COMPOUND(10)
+---->Statement>CALL(8)
+----->ID:printf(8)
+----->Arguments: (8)
+------>String:"%d"(8)
+------>Statement>CALL(8)
+------->ID:do_it(8)
+------->Arguments: (8)
+-------->Number:5(8)
+---->Statement>RET(9)
+----->Number:0(9)
 ====== LEX RESULT ======
 INT
-ID do_it 5375028800
+ID do_it 5240811072
 LBS
 INT
-ID n 5375031328
+ID n 5240813600
 RBS
 LP
 RETURN
-ID n 5375031328
+ID n 5240813600
 OP_MOD
 NUMBER 2
 SEMI
@@ -47,7 +44,7 @@ LP
 ID printf ~
 LBS
 COMMA
-ID do_it 5375028800
+ID do_it 5240811072
 LBS
 NUMBER 5
 RBS
@@ -58,12 +55,12 @@ NUMBER 0
 SEMI
 RP
 ====== SYMBOL TABLE ======
-INT n     5375031328
+INT n     5240813600
 ====== FUNCTIONS ======
-do_it     5375030880
+do_it     5240813152
 ====== IntermediateCode ======
-1 (FUNC,do_it,{5375031328(n),},_)
-2 (%,5375031328(n),2,temp0)
+1 (FUNC,do_it,{5240813600,},_)
+2 (%,#5240813600,2,temp0)
 3 (RET,temp0,_,_)
 4 (ENDF,do_it,_,_)
 5 (CALL,do_it,{5,},temp1)

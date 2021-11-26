@@ -1,64 +1,64 @@
 ====== GRAMMER TREE ======
-(13)->ROOT
-(13)-->EntryPoint
-(13)--->Statement>COMPOUND
-(3)---->Statement>DECLARE
-(3)----->Type: Int
-(3)----->Statement>ASSIGN
-(3)------>ID:a
-(3)------>Number:0
-(4)---->Statement>DECLARE
-(4)----->Type: Int
-(4)----->Statement>ASSIGN
-(4)------>ID:b
-(4)------>ID:a
-(5)---->Statement>CALL
-(5)----->ID:printf
-(5)----->Arguments: 
-(5)------>String:"%d, %d\n"
-(5)------>ID:a
-(5)------>ID:b
-(6)---->Statement>DECLARE
-(6)----->Type: Int Pointer:
-(6)----->Statement>ASSIGN
-(6)------>ID:pa
-(6)------>Expression
-(6)------->Operator> & 
-(6)------->ID:a
-(7)---->Statement>DECLARE
-(7)----->Type: Int Pointer:
-(7)----->Statement>ASSIGN
-(7)------>ID:pb
-(7)------>Expression
-(7)------->Operator> & 
-(7)------->ID:b
-(8)---->Statement>DECLARE
-(8)----->Type: Int
-(8)----->Statement>ASSIGN
-(8)------>ID:t
-(8)------>Expression
-(8)------->Operator> * 
-(8)------->ID:pb
-(9)---->Statement>ASSIGN
-(9)----->Left Value:
-(9)------>Operator> * 
-(9)------>ID:pb
-(9)----->Expression
-(9)------>Operator> * 
-(9)------>ID:pa
-(10)---->Statement>ASSIGN
-(10)----->Left Value:
-(10)------>Operator> * 
-(10)------>ID:pa
-(10)----->ID:t
-(11)---->Statement>CALL
-(11)----->ID:printf
-(11)----->Arguments: 
-(11)------>String:"%d, %d\n"
-(11)------>ID:a
-(11)------>ID:b
-(12)---->Statement>RET
-(12)----->Number:0
+->ROOT(13)
+-->EntryPoint(13)
+--->Statement>COMPOUND(13)
+---->Statement>DECLARE(3)
+----->Type: Int(3)
+----->Statement>ASSIGN(3)
+------>ID:a(3)
+------>Number:0(3)
+---->Statement>DECLARE(4)
+----->Type: Int(4)
+----->Statement>ASSIGN(4)
+------>ID:b(4)
+------>ID:a(4)
+---->Statement>CALL(5)
+----->ID:printf(5)
+----->Arguments: (5)
+------>String:"%d, %d\n"(5)
+------>ID:a(5)
+------>ID:b(5)
+---->Statement>DECLARE(6)
+----->Type: Int Pointer:(6)
+----->Statement>ASSIGN(6)
+------>ID:pa(6)
+------>Expression(6)
+------->Operator> & (6)
+------->ID:a(6)
+---->Statement>DECLARE(7)
+----->Type: Int Pointer:(7)
+----->Statement>ASSIGN(7)
+------>ID:pb(7)
+------>Expression(7)
+------->Operator> & (7)
+------->ID:b(7)
+---->Statement>DECLARE(8)
+----->Type: Int(8)
+----->Statement>ASSIGN(8)
+------>ID:t(8)
+------>Expression(8)
+------->Operator> * (8)
+------->ID:pb(8)
+---->Statement>ASSIGN(9)
+----->Left Value:(9)
+------>Operator> * (9)
+------>ID:pb(9)
+----->Expression(9)
+------>Operator> * (9)
+------>ID:pa(9)
+---->Statement>ASSIGN(10)
+----->Left Value:(10)
+------>Operator> * (10)
+------>ID:pa(10)
+----->ID:t(10)
+---->Statement>CALL(11)
+----->ID:printf(11)
+----->Arguments: (11)
+------>String:"%d, %d\n"(11)
+------>ID:a(11)
+------>ID:b(11)
+---->Statement>RET(12)
+----->Number:0(12)
 ====== LEX RESULT ======
 INT
 MAIN
@@ -66,60 +66,60 @@ LBS
 RBS
 LP
 INT
-ID a 4804610576
+ID a 4863330832
 OP_ASSIGN
 NUMBER 0
 SEMI
 INT
-ID b 4804610912
+ID b 4863331040
 OP_ASSIGN
-ID a 4804610576
+ID a 4863330832
 SEMI
 ID printf ~
 LBS
 COMMA
-ID a 4804610576
+ID a 4863330832
 COMMA
-ID b 4804610912
+ID b 4863331040
 RBS
 SEMI
 INT
 OP_MUL
-ID pa 4804611120
+ID pa 4863331264
 OP_ASSIGN
 BIT_AND
-ID a 4804610576
+ID a 4863330832
 SEMI
 INT
 OP_MUL
-ID pb 4804611984
+ID pb 4863331104
 OP_ASSIGN
 BIT_AND
-ID b 4804610912
+ID b 4863331040
 SEMI
 INT
-ID t 4804612528
+ID t 4863332080
 OP_ASSIGN
 OP_MUL
-ID pb 4804611984
+ID pb 4863331104
 SEMI
 OP_MUL
-ID pb 4804611984
+ID pb 4863331104
 OP_ASSIGN
 OP_MUL
-ID pa 4804611120
+ID pa 4863331264
 SEMI
 OP_MUL
-ID pa 4804611120
+ID pa 4863331264
 OP_ASSIGN
-ID t 4804612528
+ID t 4863332080
 SEMI
 ID printf ~
 LBS
 COMMA
-ID a 4804610576
+ID a 4863330832
 COMMA
-ID b 4804610912
+ID b 4863331040
 RBS
 SEMI
 RETURN
@@ -127,28 +127,23 @@ NUMBER 0
 SEMI
 RP
 ====== SYMBOL TABLE ======
-INT t     4804612528
-INT* pb     4804611984
-INT* pa     4804611120
-INT b     4804610912
-INT a     4804610576
+INT t     4863332080
+INT* pb     4863331104
+INT* pa     4863331264
+INT b     4863331040
+INT a     4863330832
 ====== IntermediateCode ======
-1 (DEC,a,4804610576,_)
-2 (=,4804610576(a),0,_)
-3 (DEC,b,4804610912,_)
-4 (=,4804610912(b),4804610576(a),_)
-5 (CALL,printf,{"%d, %d\n",4804610576(a),4804610912(b),},temp0)
-6 (DEC,pa,4804611120,_)
-7 (&,4804610576(a),_,temp1)
-8 (=,4804611120(pa),temp1,_)
-9 (DEC,pb,4804611984,_)
-10 (&,4804610912(b),_,temp2)
-11 (=,4804611984(pb),temp2,_)
-12 (DEC,t,4804612528,_)
-13 (*,4804611984(pb),_,temp3)
-14 (=,4804612528(t),temp3,_)
-15 (*,4804611120(pa),_,temp4)
-16 (&=,4804611984(pb),temp4,_)
-17 (&=,4804611120(pa),4804612528(t),_)
-18 (CALL,printf,{"%d, %d\n",4804610576(a),4804610912(b),},temp5)
-19 (RET,0,_,_)
+1 (=,#4863330832,0,_)
+2 (=,#4863331040,#4863330832,_)
+3 (CALL,printf,{"%d, %d\n",#4863330832,#4863331040,},temp0)
+4 (&,#4863330832,_,temp1)
+5 (=,#4863331264,temp1,_)
+6 (&,#4863331040,_,temp2)
+7 (=,#4863331104,temp2,_)
+8 (*,#4863331104,_,temp3)
+9 (=,#4863332080,temp3,_)
+10 (*,#4863331264,_,temp4)
+11 (&=,#4863331104,temp4,_)
+12 (&=,#4863331264,#4863332080,_)
+13 (CALL,printf,{"%d, %d\n",#4863330832,#4863331040,},temp5)
+14 (RET,0,_,_)
