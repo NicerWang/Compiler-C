@@ -7,7 +7,6 @@
 
 extern string lexRes;
 extern int yylineno;
-int offset = 0;
 int throwLine = -1;
 Node *root;
 
@@ -43,6 +42,12 @@ void undefinedError(Node *node, string op)
 	cout << "[error] Undefined error in line " << node->lineno << endl;
 	cout << "Use " + op + " before declare." << endl;
 	cout << "Ignore Line " << throwLine << "." << endl;
+}
+
+void notAssignedError(Node *node)
+{
+	cout << "[error] Not assigned error in line " << node->lineno << endl;
+	cout << "Use " + node->strValue + " before assgin a value." << endl;
 }
 
 void typeCheck(Node *node, SymType type, string op)
@@ -103,42 +108,14 @@ void preProcess(Node *node)
 			if (node->children[i]->subType == ASSIGN_t)
 			{
 				sym = formSymbol(node->children[i]->children[0]->strValue, type);
+				node->children[i]->children[0]->isAssigned = true;
 			}
 			else
 			{
 				sym = formSymbol(node->children[i]->strValue, type);
-			}
+				node->children[i]->isAssigned = true;
+			};
 			availNodes.push_back(sym);
-		}
-	}
-	if (node->type == VAR_t && node->subType == ID_t)
-	{
-		if (node->strValue == "printf" || node->strValue == "scanf")
-			return;
-		bool isFunc = false;
-		bool isVar = false;
-		for (int i = funcNodes.size() - 1; i >= 0; i--)
-		{
-			if (funcNodes[i]->id == node->strValue)
-			{
-				isFunc = true;
-				break;
-			}
-		}
-		for (int i = availNodesCnt - 1; i >= 0; i--)
-		{
-			if (availNodes[i]->id == node->strValue)
-			{
-				lexRes = lexRes.replace(lexRes.find(node->strValue + " ~") + node->strValue.length() + 1, 1, to_string((long long)availNodes[i]));
-				node->symType = availNodes[i]->type;
-				isVar = true;
-				break;
-			}
-		}
-		if (!isFunc && !isVar)
-		{
-			throwLine = node->lineno;
-			undefinedError(node, node->strValue);
 		}
 	}
 	if (node->type == FUNC_t)
@@ -169,17 +146,55 @@ void preProcess(Node *node)
 				type = SYM_INT_STAR_t;
 				func->sub.push_back(SYM_INT_STAR_t);
 			}
-			availNodes.push_back(formSymbol(node->children[1]->children[i]->strValue, type));
+			Symbol *sym = formSymbol(node->children[1]->children[i]->strValue, type);
+			sym->isAssigned = true;
+			sym->assignCnt = 2;
+			availNodes.push_back(sym);
 			int k;
 			for (k = availNodes.size() - 1; k >= 0; k--)
 				if (availNodes[k]->id == node->children[1]->children[k]->strValue)
 					break;
-			arguments += to_string((long long)availNodes[k]) + ",";
+			arguments += "#" + to_string((long long)availNodes[k]) + ",";
 			lexRes = lexRes.replace(lexRes.find(node->children[1]->children[i]->strValue + " ~") + node->children[1]->children[i]->strValue.length() + 1, 1, to_string((long long)availNodes[k]));
 		}
 		funcNodes.push_back(func);
 		arguments += "}";
 		intermediate.push_back(formLine("FUNC", node->children[0]->strValue, arguments, "_"));
+	}
+	if (node->type == VAR_t && node->subType == ID_t)
+	{
+		if (node->strValue == "printf" || node->strValue == "scanf")
+			return;
+		bool isFunc = false;
+		bool isVar = false;
+		for (int i = funcNodes.size() - 1; i >= 0; i--)
+		{
+			if (funcNodes[i]->id == node->strValue)
+			{
+				isFunc = true;
+				break;
+			}
+		}
+		for (int i = availNodesCnt - 1; i >= 0; i--)
+		{
+			if (availNodes[i]->id == node->strValue)
+			{
+				if (!availNodes[i]->isAssigned && !node->isAssigned)
+				{
+					notAssignedError(node);
+					// exit(0);
+				}
+				lexRes = lexRes.replace(lexRes.find(node->strValue + " ~") + node->strValue.length() + 1, 1, to_string((long long)availNodes[i]));
+				node->symType = availNodes[i]->type;
+				isVar = true;
+				break;
+			}
+		}
+		if (!isFunc && !isVar)
+		{
+			throwLine = node->lineno;
+			undefinedError(node, node->strValue);
+		}
 	}
 }
 
@@ -236,21 +251,33 @@ void postProcess(Node *node)
 				}
 				case OP_PP_t:
 				{
-					op = "++";
+					op = "+";
 					if (i == 0)
+					{
 						preOrPost = PRE_PLUS;
+						var2 = "1";
+					}
 					else
+					{
 						preOrPost = POST_PLUS;
+						var2 = "0";
+					}
 					typeCheck(node, SYM_INT_t, op);
 					break;
 				}
 				case OP_MM_t:
 				{
-					op = "--";
+					op = "-";
 					if (i == 0)
+					{
 						preOrPost = PRE_SUB;
+						var2 = "1";
+					}
 					else
+					{
 						preOrPost = POST_SUB;
+						var2 = "0";
+					}
 					typeCheck(node, SYM_INT_t, op);
 					break;
 				}
@@ -374,6 +401,7 @@ void postProcess(Node *node)
 				break;
 
 		var1 = "#" + to_string((long long)availNodes[i]);
+		availNodes[i]->isAssigned = true;
 
 		if (node->children[1]->symType != targetType)
 		{
@@ -398,6 +426,7 @@ void postProcess(Node *node)
 				var2 = "#" + to_string((long long)availNodes[k]);
 			}
 		}
+		availNodes[i]->value = var2;
 	}
 	else if (node->type == STMT_t && node->subType == RET_t)
 	{
@@ -511,27 +540,31 @@ void postProcess(Node *node)
 	}
 	if (preOrPost == PRE_PLUS)
 	{
-		intermediate.push_back(formLine("+", var1, "1", var1));
+		intermediate.push_back(formLine("+", var1, "1", "temp" + to_string(tempValCnt)));
+		intermediate.push_back(formLine("=", var1, "temp" + to_string(tempValCnt), "_"));
+		tempValCnt++;
 	}
 	if (preOrPost == PRE_SUB)
 	{
-		intermediate.push_back(formLine("-", var1, "1", var1));
+		intermediate.push_back(formLine("-", var1, "1", "temp" + to_string(tempValCnt)));
+		intermediate.push_back(formLine("=", var1, "temp" + to_string(tempValCnt), "_"));
+		tempValCnt++;
 	}
-	if (op != "_" && preOrPost == 0)
+	if (op != "_")
 	{
 		intermediate.push_back(formLine(op, var1, var2, ret));
 	}
-	if (preOrPost != 0)
-	{
-		intermediate.push_back(formLine("=", ret, var1, "_"));
-	}
 	if (preOrPost == POST_PLUS)
 	{
-		intermediate.push_back(formLine("+", var1, "1", var1));
+		intermediate.push_back(formLine("+", var1, "1", "temp" + to_string(tempValCnt)));
+		intermediate.push_back(formLine("=", var1, "temp" + to_string(tempValCnt), "_"));
+		tempValCnt++;
 	}
 	if (preOrPost == POST_SUB)
 	{
-		intermediate.push_back(formLine("-", var1, "1", var1));
+		intermediate.push_back(formLine("-", var1, "1", "temp" + to_string(tempValCnt)));
+		intermediate.push_back(formLine("=", var1, "temp" + to_string(tempValCnt), "_"));
+		tempValCnt++;
 	}
 }
 
@@ -894,6 +927,112 @@ void grammerTreeDfs(Node *node, int depth)
 	}
 }
 
+void split(const string &s, vector<string> &tokens, const string &delimiters = " ")
+{
+	string::size_type lastPos = s.find_first_not_of(delimiters, 0);
+	string::size_type pos = s.find_first_of(delimiters, lastPos);
+	while (string::npos != pos || string::npos != lastPos)
+	{
+		tokens.push_back(s.substr(lastPos, pos - lastPos));
+		lastPos = s.find_first_not_of(delimiters, pos);
+		pos = s.find_first_of(delimiters, lastPos);
+	}
+}
+
+void IntermediateOptimize()
+{
+	//rule1
+	vector<int> tempUsage(tempValCnt, 0);
+	for (int i = 0; i < intermediate.size(); i++)
+	{
+		if (intermediate[i][0] == "CALL")
+		{
+			tempUsage[stoi(intermediate[i][3].substr(4, intermediate[i][3].length()))]++;
+		}
+		if (intermediate[i][1].find("temp") != string::npos)
+		{
+			tempUsage[stoi(intermediate[i][1].substr(4, intermediate[i][1].length()))]++;
+		}
+		if (intermediate[i][2][0] == '{')
+		{
+			string temp = intermediate[i][2].substr(1, intermediate[i][2].length() - 2);
+			vector<string> argus;
+			split(temp, argus, ",");
+			for (int k = 0; k < argus.size(); k++)
+			{
+				if (argus[k].find("temp") != string::npos)
+				{
+					tempUsage[stoi(argus[k].substr(4, argus[k].length()))]++;
+				}
+			}
+		}
+		else
+		{
+			if (intermediate[i][2].find("temp") != string::npos)
+			{
+				tempUsage[stoi(intermediate[i][2].substr(4, intermediate[i][2].length()))]++;
+			}
+		}
+	}
+	for (int i = 0; i < intermediate.size(); i++)
+	{
+		if (intermediate[i][3].find("temp") != string::npos)
+		{
+			if (tempUsage[stoi(intermediate[i][3].substr(4, intermediate[i][3].length()))] == 0)
+			{
+				intermediate[i][0] = "_";
+			}
+		}
+	}
+	// for (int i = 0; i < tempUsage.size(); i++)
+	// {
+	// 	cout << i << ":" << tempUsage[i] << endl;
+	// }
+	//rule2
+	for (int i = 0; i < intermediate.size(); i++)
+	{
+		if ((intermediate[i][0] == "=" || intermediate[i][0] == "&=") && intermediate[i][1][0] == '#')
+		{
+			Symbol *ptr = (Symbol *)stol(intermediate[i][1].substr(1, intermediate[i][1].length()));
+			ptr->assignCnt++;
+			if (intermediate[i][2][0] == '#' || intermediate[i][2][0] == 't')
+			{
+				ptr->assignCnt = 2;
+			}
+		}
+		if (intermediate[i][0] == "&")
+		{
+			Symbol *ptr = (Symbol *)stol(intermediate[i][1].substr(1, intermediate[i][1].length()));
+			ptr->assignCnt = 2;
+		}
+	}
+	vector<pair<string, string> *> toBeRemove;
+	for (int i = 0; i < symbolTable.size(); i++)
+	{
+		if (symbolTable[i]->assignCnt <= 1)
+		{
+			toBeRemove.push_back(new pair<string, string>("#" + to_string((long long)symbolTable[i]), symbolTable[i]->value));
+		}
+	}
+	for (int i = 0; i < toBeRemove.size(); i++)
+	{
+		for (int j = 0; j < intermediate.size(); j++)
+		{
+			for (int k = 1; k < 4; k++)
+			{
+				if (intermediate[j][k] == toBeRemove[i]->first)
+				{
+					intermediate[j][k] = toBeRemove[i]->second;
+					if (intermediate[j][0] == "=" && k == 1)
+					{
+						intermediate[j][0] = "_";
+					}
+				}
+			}
+		}
+	}
+}
+
 void showTree(Node *node)
 {
 	formIntermediateCode(root);
@@ -919,5 +1058,16 @@ void showTree(Node *node)
 	for (int i = 0; i < intermediate.size(); i++)
 	{
 		cout << i + 1 << " (" + intermediate[i][0] + "," + intermediate[i][1] + "," + intermediate[i][2] + "," + intermediate[i][3] + ")" << endl;
+	}
+	IntermediateOptimize();
+	cout << "====== Optimized IntermediateCode ======" << endl;
+	int line = 1;
+	for (int i = 0; i < intermediate.size(); i++)
+	{
+		if (intermediate[i][0] != "_")
+		{
+			cout << line << " " << i + 1 << " (" + intermediate[i][0] + "," + intermediate[i][1] + "," + intermediate[i][2] + "," + intermediate[i][3] + ")" << endl;
+			line++;
+		}
 	}
 }

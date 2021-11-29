@@ -67,8 +67,10 @@ class Symbol
 public:
 	string id;
 	SymType type;
-	int value;
+	string value;
 	vector<SymType> sub;
+	bool isAssigned = false;
+	int assignCnt = 0;
 };
 
 class Node
@@ -81,6 +83,7 @@ public:
 	string strValue;
 	int lineno;
 	SymType symType;
+	bool isAssigned = false;
 	Node()
 	{
 		this->subType = NONE_t;

@@ -104,6 +104,7 @@ declare_list: type id COMMA declare_list
 	Node* newNode = formNode(PARAM_t,SINGLE_t);
 	newNode->intValue = $1->subType;
 	newNode->strValue = $2->strValue;
+	newNode->isAssigned = true;
 	$$->push_back(newNode);
 }
 | type id
@@ -111,6 +112,7 @@ declare_list: type id COMMA declare_list
 	Node* newNode = formNode(PARAM_t,SINGLE_t);
 	newNode->intValue = $1->subType;
 	newNode->strValue = $2->strValue;
+	newNode->isAssigned = true;
 	$$ = new vector<Node*>();
 	$$->push_back(newNode);
 }
@@ -271,6 +273,7 @@ assign_lv: left_val OP_ASSIGN expr
 {
 	$$ = formNode(STMT_t,ASSIGN_t);
 	$$->children.push_back($1);
+	$1->isAssigned = true;
 	$$->children.push_back($3);
 }
 ;
@@ -279,6 +282,7 @@ assign_id: id OP_ASSIGN expr
 {
 	$$ = formNode(STMT_t,ASSIGN_t);
 	$$->children.push_back($1);
+	$1->isAssigned = true;
 	$$->children.push_back($3);
 }
 ;

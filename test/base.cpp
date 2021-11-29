@@ -1,4 +1,3 @@
-
 int printf()
 {
     int n = 5;
@@ -11,13 +10,17 @@ int scanf()
 
 int main()
 {
-    int m = 2;
-    int n = 3;
+    int m;
+    int kdwada = 1;
+
+    int n;
+    m = 2;
     // handle IO
     // 1 \n
     scanf("%d", &m);
-    printf("%d\n", (m + 100) % 2);
-
+    n = m;
+    printf("%d\n", (n + 100) % 2);
+    m++;
     int i = 0;
     int factorial = 3;
     int result = 1;
