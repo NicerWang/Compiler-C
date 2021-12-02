@@ -1,12 +1,3 @@
-int printf()
-{
-    int n = 5;
-    return n;
-}
-int scanf()
-{
-    return 0;
-}
 
 int main()
 {

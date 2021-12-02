@@ -412,6 +412,10 @@ void postProcess(Node *node)
 		{
 			var2 = node->children[1]->strValue;
 		}
+		else if (node->children[1]->subType == CALL_t)
+		{
+			var2 = node->children[1]->strValue;
+		}
 		else if (node->children[1]->type == VAR_t)
 		{
 			if (node->children[1]->subType == NUMBER_t)

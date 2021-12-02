@@ -15,8 +15,11 @@
 ---->Statement>DECLARE(8)
 ----->Type: Int(8)
 ----->Statement>ASSIGN(8)
------->ID:i(8)
------->Number:0(8)
+------>ID:c(8)
+------>Statement>CALL(8)
+------->ID:do_it(8)
+------->Arguments: (8)
+-------->Number:5(8)
 ---->Statement>CALL(9)
 ----->ID:printf(9)
 ----->Arguments: (9)
@@ -29,14 +32,14 @@
 ----->Number:0(10)
 ====== LEX RESULT ======
 INT
-ID do_it 5140147776
+ID do_it 5056261696
 LBS
 INT
-ID n 5140150816
+ID n 5056265136
 RBS
 LP
 RETURN
-ID n 5140150816
+ID n 5056265136
 OP_MOD
 NUMBER 2
 SEMI
@@ -47,14 +50,17 @@ LBS
 RBS
 LP
 INT
-ID i 5140151568
+ID c 5056265888
 OP_ASSIGN
-NUMBER 0
+ID do_it 5056261696
+LBS
+NUMBER 5
+RBS
 SEMI
 ID printf ~
 LBS
 COMMA
-ID do_it 5140147776
+ID do_it 5056261696
 LBS
 NUMBER 5
 RBS
@@ -65,24 +71,27 @@ NUMBER 0
 SEMI
 RP
 ====== SYMBOL TABLE ======
-INT n     5140150816
-INT i     5140151568
+INT n     5056265136
+INT c     5056265888
 ====== FUNCTIONS ======
-do_it     5140150720
+do_it     5056265040
 ====== IntermediateCode ======
-1 (FUNC,do_it,{#5140150816,},_)
-2 (%,#5140150816,2,temp0)
+1 (FUNC,do_it,{#5056265136,},_)
+2 (%,#5056265136,2,temp0)
 3 (RET,temp0,_,_)
 4 (ENDF,do_it,_,_)
-5 (=,#5140151568,0,_)
-6 (CALL,do_it,{5,},temp1)
-7 (CALL,printf,{"%d",temp1,},temp2)
-8 (RET,0,_,_)
+5 (CALL,do_it,{5,},temp1)
+6 (=,#5056265888,temp1,_)
+7 (CALL,do_it,{5,},temp2)
+8 (CALL,printf,{"%d",temp2,},temp3)
+9 (RET,0,_,_)
 ====== Optimized IntermediateCode ======
-1 1 (FUNC,do_it,{#5140150816,},_)
-2 2 (%,#5140150816,2,temp0)
+1 1 (FUNC,do_it,{#5056265136,},_)
+2 2 (%,#5056265136,2,temp0)
 3 3 (RET,temp0,_,_)
 4 4 (ENDF,do_it,_,_)
-5 6 (CALL,do_it,{5,},temp1)
-6 7 (CALL,printf,{"%d",temp1,},temp2)
-7 8 (RET,0,_,_)
+5 5 (CALL,do_it,{5,},temp1)
+6 6 (=,#5056265888,temp1,_)
+7 7 (CALL,do_it,{5,},temp2)
+8 8 (CALL,printf,{"%d",temp2,},temp3)
+9 9 (RET,0,_,_)
