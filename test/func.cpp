@@ -5,7 +5,9 @@ int do_it(int n)
 
 int main()
 {
-    int c = do_it(5);
+    int d = 5;
+    int c = do_it(d);
     printf("%d", do_it(5)); // should be 1
+    d = d + 1;
     return 0;
 }

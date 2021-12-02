@@ -1,5 +1,5 @@
 ====== GRAMMER TREE ======
-->ROOT(11)
+->ROOT(13)
 -->Function|Int(4)
 --->ID:do_it(1)
 --->Parameters: (4)
@@ -10,36 +10,47 @@
 ------>ID:n(3)
 ------>Operator> % (3)
 ------>Number:2(3)
--->EntryPoint(11)
---->Statement>COMPOUND(11)
+-->EntryPoint(13)
+--->Statement>COMPOUND(13)
 ---->Statement>DECLARE(8)
 ----->Type: Int(8)
 ----->Statement>ASSIGN(8)
------->ID:c(8)
------->Statement>CALL(8)
-------->ID:do_it(8)
-------->Arguments: (8)
--------->Number:5(8)
----->Statement>CALL(9)
------>ID:printf(9)
------>Arguments: (9)
------->String:"%d"(9)
+------>ID:d(8)
+------>Number:5(8)
+---->Statement>DECLARE(9)
+----->Type: Int(9)
+----->Statement>ASSIGN(9)
+------>ID:c(9)
 ------>Statement>CALL(9)
 ------->ID:do_it(9)
 ------->Arguments: (9)
--------->Number:5(9)
----->Statement>RET(10)
------>Number:0(10)
+-------->ID:d(9)
+---->Statement>CALL(10)
+----->ID:printf(10)
+----->Arguments: (10)
+------>String:"%d"(10)
+------>Statement>CALL(10)
+------->ID:do_it(10)
+------->Arguments: (10)
+-------->Number:5(10)
+---->Statement>ASSIGN(11)
+----->ID:d(11)
+----->Expression(11)
+------>ID:d(11)
+------>Operator> + (11)
+------>Number:1(11)
+---->Statement>RET(12)
+----->Number:0(12)
 ====== LEX RESULT ======
 INT
-ID do_it 5056261696
+ID do_it 5131759168
 LBS
 INT
-ID n 5056265136
+ID n 5131764096
 RBS
 LP
 RETURN
-ID n 5056265136
+ID n 5131764096
 OP_MOD
 NUMBER 2
 SEMI
@@ -50,48 +61,66 @@ LBS
 RBS
 LP
 INT
-ID c 5056265888
+ID d 5131764832
 OP_ASSIGN
-ID do_it 5056261696
-LBS
 NUMBER 5
+SEMI
+INT
+ID c 5131764640
+OP_ASSIGN
+ID do_it 5131759168
+LBS
+ID d 5131764832
 RBS
 SEMI
 ID printf ~
 LBS
 COMMA
-ID do_it 5056261696
+ID do_it 5131759168
 LBS
 NUMBER 5
 RBS
 RBS
+SEMI
+ID d 5131764832
+OP_ASSIGN
+ID d 5131764832
+OP_ADD
+NUMBER 1
 SEMI
 RETURN
 NUMBER 0
 SEMI
 RP
 ====== SYMBOL TABLE ======
-INT n     5056265136
-INT c     5056265888
+INT n     5131764096
+INT c     5131764640
+INT d     5131764832
 ====== FUNCTIONS ======
-do_it     5056265040
+do_it     5131764000
 ====== IntermediateCode ======
-1 (FUNC,do_it,{#5056265136,},_)
-2 (%,#5056265136,2,temp0)
+1 (FUNC,do_it,{#5131764096,},_)
+2 (%,#5131764096,2,temp0)
 3 (RET,temp0,_,_)
 4 (ENDF,do_it,_,_)
-5 (CALL,do_it,{5,},temp1)
-6 (=,#5056265888,temp1,_)
-7 (CALL,do_it,{5,},temp2)
-8 (CALL,printf,{"%d",temp2,},temp3)
-9 (RET,0,_,_)
+5 (=,#5131764832,5,_)
+6 (CALL,do_it,{#5131764832,},temp1)
+7 (=,#5131764640,temp1,_)
+8 (CALL,do_it,{5,},temp2)
+9 (CALL,printf,{"%d",temp2,},temp3)
+10 (+,#5131764832,1,temp4)
+11 (=,#5131764832,temp4,_)
+12 (RET,0,_,_)
 ====== Optimized IntermediateCode ======
-1 1 (FUNC,do_it,{#5056265136,},_)
-2 2 (%,#5056265136,2,temp0)
+1 1 (FUNC,do_it,{#5131764096,},_)
+2 2 (%,#5131764096,2,temp0)
 3 3 (RET,temp0,_,_)
 4 4 (ENDF,do_it,_,_)
-5 5 (CALL,do_it,{5,},temp1)
-6 6 (=,#5056265888,temp1,_)
-7 7 (CALL,do_it,{5,},temp2)
-8 8 (CALL,printf,{"%d",temp2,},temp3)
-9 9 (RET,0,_,_)
+5 5 (=,#5131764832,5,_)
+6 6 (CALL,do_it,{#5131764832,},temp1)
+7 7 (=,#5131764640,temp1,_)
+8 8 (CALL,do_it,{5,},temp2)
+9 9 (CALL,printf,{"%d",temp2,},temp3)
+10 10 (+,#5131764832,1,temp4)
+11 11 (=,#5131764832,temp4,_)
+12 12 (RET,0,_,_)

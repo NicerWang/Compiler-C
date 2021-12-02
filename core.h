@@ -1032,6 +1032,11 @@ void IntermediateOptimize()
 						intermediate[j][0] = "_";
 					}
 				}
+				if (k == 2 && intermediate[j][k][0] == '{')
+				{
+					if (intermediate[j][k].find(toBeRemove[i]->first) != -1)
+						intermediate[j][k] = intermediate[j][k].replace(intermediate[j][k].find(toBeRemove[i]->first), toBeRemove[i]->first.size(), toBeRemove[i]->second);
+				}
 			}
 		}
 	}
