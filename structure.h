@@ -1,6 +1,12 @@
+#ifndef STRUCTURE_H
+#define STRUCTURE_H
 #include <iostream>
 #include <string>
 #include <vector>
+#include <map>
+#include <queue>
+#include <stack>
+#include <sstream>
 using namespace std;
 enum SubType
 {
@@ -89,3 +95,4 @@ public:
 		this->subType = NONE_t;
 	}
 };
+#endif
