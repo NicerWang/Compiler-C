@@ -1,4 +1,4 @@
-#include "struct.h"
+#include "structure.h"
 
 #define PRE_PLUS 1
 #define POST_PLUS 2
@@ -14,6 +14,7 @@ vector<Symbol *> symbolTable;
 vector<Symbol *> availNodes;
 vector<Symbol *> funcNodes;
 vector<vector<string>> intermediate;
+vector<vector<string>> asmCode;
 int availNodesCnt = 0;
 int tempValCnt = 0;
 
@@ -997,7 +998,7 @@ void IntermediateOptimize()
 	{
 		if ((intermediate[i][0] == "=" || intermediate[i][0] == "&=") && intermediate[i][1][0] == '#')
 		{
-			Symbol *ptr = (Symbol *)stol(intermediate[i][1].substr(1, intermediate[i][1].length()));
+			Symbol *ptr = (Symbol *)stoll(intermediate[i][1].substr(1, intermediate[i][1].length()));
 			ptr->assignCnt++;
 			if (intermediate[i][2][0] == '#' || intermediate[i][2][0] == 't')
 			{
@@ -1006,7 +1007,7 @@ void IntermediateOptimize()
 		}
 		if (intermediate[i][0] == "&")
 		{
-			Symbol *ptr = (Symbol *)stol(intermediate[i][1].substr(1, intermediate[i][1].length()));
+			Symbol *ptr = (Symbol *)stoll(intermediate[i][1].substr(1, intermediate[i][1].length()));
 			ptr->assignCnt = 2;
 		}
 	}
@@ -1042,27 +1043,759 @@ void IntermediateOptimize()
 	}
 }
 
+string findVarOrArg(string aimVar, map<string, int> &argumentMap, map<string, int> &variableMap, int &stackDeep)
+{
+	string retStr;
+	map<string, int>::iterator it;
+	it = argumentMap.find(aimVar);
+	if (it == argumentMap.end())
+	{
+		it = variableMap.find(aimVar);
+		if (it == variableMap.end())
+		{
+			return "";
+		}
+		else
+		{
+			stringstream ss;
+			ss << (stackDeep - it->second);
+			ss >> retStr;
+			retStr = "[esp+" + retStr + "]";
+		}
+	}
+	else
+	{
+		stringstream ss;
+		ss << it->second;
+		ss >> retStr;
+		retStr = "[ebp+" + retStr + "]";
+	}
+	return retStr;
+}
+
+void formAsmCode()
+{
+	map<string, int> anchorMap;	  //key跳转标签名
+	map<string, int> variableMap; //key 变量(局部、temp)标记 value 与abp的距离
+	map<string, int> argumentMap; //key 实参标记 value 与abp的距离
+	int JMPAnchorCount = 0;		  //跳转标签计数
+	int stackDeep = 0;			  //栈深，即asp与abp的差值
+	stringstream ss;
+	vector<int> funcStackDeepList;
+	int currentFuncIndex = 0;
+	for (int i = 0; i < intermediate.size(); ++i)
+	{
+		if (intermediate[i][0] == "JMP" || intermediate[i][0] == "IFNZ")
+		{
+			anchorMap.insert(map<string, int>::value_type("Anchor" + intermediate[i][3], 0));
+		}
+		else if (intermediate[i][0] == "RET")
+		{
+			funcStackDeepList.push_back(stackDeep);
+			stackDeep = 0;
+		}
+		else
+		{
+			if (intermediate[i][1][0] == 't' || intermediate[i][1][0] == '#')
+			{
+				if (variableMap.find(intermediate[i][1]) == variableMap.end())
+				{
+					stackDeep += 4;
+					variableMap.insert(map<string, int>::value_type(intermediate[i][1], stackDeep));
+				}
+			}
+			if (intermediate[i][2][0] == 't' || intermediate[i][2][0] == '#')
+			{
+				if (variableMap.find(intermediate[i][2]) == variableMap.end())
+				{
+					stackDeep += 4;
+					variableMap.insert(map<string, int>::value_type(intermediate[i][2], stackDeep));
+				}
+			}
+			if (intermediate[i][3][0] == 't' || intermediate[i][3][0] == '#')
+			{
+				if (variableMap.find(intermediate[i][3]) == variableMap.end())
+				{
+					stackDeep += 4;
+					variableMap.insert(map<string, int>::value_type(intermediate[i][3], stackDeep));
+				}
+			}
+		}
+	}
+	for (int i = 0; i < intermediate.size(); ++i)
+	{
+
+		string op = intermediate[i][0];
+		string arg1 = intermediate[i][1];
+		string arg2 = intermediate[i][2];
+		string re = intermediate[i][3];
+
+		string anchorStr = "Anchor" + to_string(i + 1);
+		vector<string> tempcode;
+		if (anchorMap.find(anchorStr) != anchorMap.end())
+		{
+			tempcode.push_back("." + anchorStr + ":\n");
+		}
+
+		if (op == "FUNC")
+		{
+			if (arg1 == "printf")
+			{
+			}
+			else if (arg1 == "scanf")
+			{
+			}
+			else
+			{
+				tempcode.push_back(arg1.append(":\n"));
+				tempcode.push_back("\tpush ebp\n\tmov ebp, esp\n\tsub esp, " + to_string(funcStackDeepList[currentFuncIndex]) + "\n");
+				//有参数时记录参数相对ebp位置
+				if (arg2 != "{}")
+				{
+					//分离出参数
+					queue<string> tempArgQueue;
+					string tempArgStr = arg2;
+					int pos = 1;
+					while (pos != tempArgStr.size() - 1)
+					{
+						int nextPos = tempArgStr.find(',', pos);
+						string tempArg = tempArgStr.substr(pos + 1, nextPos - pos - 1);
+						tempArgQueue.push(tempArg);
+						pos = nextPos + 1;
+					}
+					int stackSizeCount = 8; //返回指针占4字节 进入函数后push ebp占用4字节
+					while (!tempArgQueue.empty())
+					{
+						argumentMap.insert(map<string, int>::value_type("#" + tempArgQueue.front(), stackSizeCount));
+						tempArgQueue.pop();
+						stackSizeCount += 4;
+					}
+				}
+			}
+		}
+		else if (op == "ENDF")
+		{
+			currentFuncIndex++;
+			argumentMap.clear();
+			tempcode.push_back("\n");
+			if (currentFuncIndex == funcStackDeepList.size() - 1)
+			{
+				tempcode.push_back("CMAIN:\n\tmov ebp, esp\n\tsub esp, " + to_string(funcStackDeepList[currentFuncIndex]) + "\n");
+			}
+		}
+		else if (op == "RET")
+		{
+			//返回值为常量
+			if (arg1[0] != '#' && arg1[0] != 't')
+			{
+				tempcode.push_back("\tmov eax, dword " + arg1 + "\n");
+			}
+			//返回值为变量
+			else
+			{
+				string arg1Str = findVarOrArg(arg1, argumentMap, variableMap, funcStackDeepList[currentFuncIndex]);
+				if (arg1Str == "")
+				{
+					cout << "[error] " + arg1 + " not found in " << i << " -> (" << op << "," << arg1 << "," << arg2 << "," << re << ")" << endl;
+				}
+				else
+				{
+					tempcode.push_back("\tmov eax, " + arg1Str + "\n");
+				}
+			}
+			//清理栈帧 补充寄存器备份
+			tempcode.push_back("\tadd esp, " + to_string(funcStackDeepList[currentFuncIndex]) + "\n");
+
+			map<string, int>::iterator it;
+			if (currentFuncIndex < funcStackDeepList.size() - 1)
+				tempcode.push_back("\tpop ebp\n");
+			tempcode.push_back("\tret\n");
+		}
+		else if (op == "CALL")
+		{
+			if (arg1 == "printf")
+			{
+				if (arg2 != "{}")
+				{
+					//分离出参数
+					int argCount = 0;
+					queue<string> tempArgQueue;
+					string tempArgStr = arg2;
+					int pos = 1;
+					while (pos != tempArgStr.size() - 1)
+					{
+						int nextPos = tempArgStr.find(",", pos);
+						string tempArg = tempArgStr.substr(pos, nextPos - pos);
+						tempArgQueue.push(tempArg);
+						argCount++;
+						pos = nextPos + 1;
+					}
+
+					string oriStr = tempArgQueue.front();
+					tempArgQueue.pop();
+					if (!tempArgQueue.empty())
+					{
+						int pos = 1;
+						while (true)
+						{
+							int nextPos = oriStr.find("%d", pos);
+							if (nextPos > oriStr.size())
+							{
+
+								tempcode.push_back("\tPRINT_STRING `" + oriStr.substr(pos, oriStr.size() - 1 - pos) + "`\n");
+								break;
+							}
+							else
+							{
+								tempcode.push_back("\tPRINT_STRING `" + oriStr.substr(pos, nextPos - pos) + "`\n");
+								string decStr = findVarOrArg(tempArgQueue.front(), argumentMap, variableMap, funcStackDeepList[currentFuncIndex]);
+								tempcode.push_back("\tPRINT_DEC 4," + decStr + "\n");
+								tempArgQueue.pop();
+							}
+							pos = nextPos + 2;
+						}
+					}
+					else
+					{
+						tempcode.push_back("\tPRINT_STRING `" + oriStr.substr(1, oriStr.size() - 2) + "`\n");
+					}
+				}
+				else
+				{
+					tempcode.push_back("\tNEWLINE\n");
+				}
+			}
+			else if (arg1 == "scanf")
+			{
+				if (arg2 == "{}")
+				{
+					cout << "[error] arg2 is empty in (" + op + "," + arg1 + "," + arg2 + "," + re + ")" << endl;
+				}
+				else
+				{
+					//分离出参数
+					int argCount = 0;
+					queue<string> tempArgQueue;
+					string tempArgStr = arg2;
+					int pos = 1;
+					while (pos != tempArgStr.size() - 1)
+					{
+						int nextPos = tempArgStr.find(",", pos);
+						string tempArg = tempArgStr.substr(pos, nextPos - pos);
+						tempArgQueue.push(tempArg);
+						argCount++;
+						pos = nextPos + 1;
+					}
+					while (!tempArgQueue.empty())
+					{
+						string varStr = findVarOrArg(tempArgQueue.front(), argumentMap, variableMap, funcStackDeepList[currentFuncIndex]);
+						if (varStr == "")
+						{
+							cout << tempArgQueue.front() << " not found in (" + op + "<" + arg1 + "<" + arg2 + "," + re + ")" << endl;
+						}
+						else
+						{
+							tempcode.push_back("\tGET_DEC 4, eax\n\tmov ebx, " + varStr + "\n\tmov [ebx], eax\n");
+						}
+						tempArgQueue.pop();
+					}
+				}
+			}
+			else
+			{
+				//处理传参
+				int argSizeCount = 0;
+				if (arg2 != "{}")
+				{
+					//分离出参数
+					stack<string> tempArgStack;
+					string tempArgStr = arg2;
+					int pos = 1;
+					while (pos != tempArgStr.size() - 1)
+					{
+						int nextPos = tempArgStr.find(',', pos);
+						string tempArg = tempArgStr.substr(pos, nextPos - pos);
+						tempArgStack.push(tempArg);
+						argSizeCount += 4;
+						pos = nextPos + 1;
+					}
+					//参数压栈
+					while (!tempArgStack.empty())
+					{
+						string str = tempArgStack.top();
+						//传入参数为变量
+						if (str[0] == '#' || str[0] == 't')
+						{
+							string varStr = findVarOrArg(str, argumentMap, variableMap, funcStackDeepList[currentFuncIndex]);
+							if (varStr == "")
+							{
+								cout << "[error] arg:" + str + " not found in  " << i << " -> (" << op << "," << arg1 << "," << arg2 << "," << re << ")" << endl;
+							}
+							else
+							{
+								tempcode.push_back("\tpush dword " + varStr + "\n");
+							}
+						}
+						//传入参数为常量
+						else
+						{
+							tempcode.push_back("\tpush dword " + str + "\n");
+						}
+						tempArgStack.pop();
+					}
+				}
+				tempcode.push_back("\tcall " + arg1 + "\n");
+				if (argSizeCount != 0)
+				{
+					string tempStr;
+					ss.str("");
+					ss.clear();
+					ss << argSizeCount;
+					ss >> tempStr;
+					tempcode.push_back("\tadd esp, " + tempStr + "\n");
+				}
+				string reStr = findVarOrArg(re, argumentMap, variableMap, funcStackDeepList[currentFuncIndex]);
+				if (reStr == "")
+				{
+					cout << "[error] " + re + " not found in (" + op + "," + arg1 + "," + arg2 + "," + re + ")" << endl;
+				}
+				else
+				{
+					tempcode.push_back("\tmov " + reStr + ", eax\n");
+				}
+			}
+		}
+		else if (op == "+" || op == "-" || op == "*")
+		{
+			//解引用
+			if (op == "*" && arg2 == "_")
+			{
+				string varStr = findVarOrArg(arg1, argumentMap, variableMap, funcStackDeepList[currentFuncIndex]);
+				if (varStr == "")
+				{
+					cout << "[error] " + arg1 + " not found in (" + op + "," + arg1 + "," + arg2 + "," + re + ")";
+				}
+				else
+				{
+					tempcode.push_back("\tmov eax, " + varStr + "\n");
+					tempcode.push_back("\tmov eax, [eax]\n");
+					string reStr = findVarOrArg(re, argumentMap, variableMap, funcStackDeepList[currentFuncIndex]);
+					if (reStr == "")
+					{
+						cout << "[error] " + re + " not found in (" + op + "," + arg1 + "," + arg2 + "," + re + ")" << endl;
+					}
+					else
+					{
+						tempcode.push_back("\tmov " + reStr + ", eax\n");
+					}
+				}
+			}
+			else
+			{
+				string opStr;
+				if (op == "+")
+					opStr = "add";
+				else if (op == "-")
+					opStr = "sub";
+				else
+					opStr = "imul";
+				//arg1导入eax
+				if (arg1[0] == '#' || arg1[0] == 't')
+				{
+					string varStr = findVarOrArg(arg1, argumentMap, variableMap, funcStackDeepList[currentFuncIndex]);
+					if (varStr == "")
+					{
+						cout << "[error] " + arg1 + "not found in " << i << " -> (" << op << "," << arg1 << "," << arg2 << "," << re << ")" << endl;
+					}
+					else
+					{
+						tempcode.push_back("\tmov eax, " + varStr + "\n");
+					}
+				}
+				else
+				{
+					tempcode.push_back("\tmov eax, dword " + arg1 + "\n");
+				}
+				//arg2导入ebx
+				if (arg2[0] == '#' || arg2[0] == 't')
+				{
+					string varStr = findVarOrArg(arg2, argumentMap, variableMap, funcStackDeepList[currentFuncIndex]);
+					if (varStr == "")
+					{
+						cout << "[error] " + arg2 + " not found in " << i << " -> (" << op << "," << arg1 << "," << arg2 << "," << re << ")" << endl;
+					}
+					else
+					{
+						tempcode.push_back("\tmov ebx, " + varStr + "\n");
+					}
+				}
+				else
+				{
+					tempcode.push_back("\tmov ebx, dword " + arg2 + "\n");
+				}
+				//运算
+				tempcode.push_back("\t" + opStr + " eax, ebx\n");
+				//处理re
+				string reStr = findVarOrArg(re, argumentMap, variableMap, funcStackDeepList[currentFuncIndex]);
+				if (reStr == "")
+				{
+					cout << "[error] " + re + " not found in (" + op + "," + arg1 + "," + arg2 + "," + re + ")" << endl;
+				}
+				else
+				{
+					tempcode.push_back("\tmov " + reStr + ", eax\n");
+				}
+			}
+		}
+		else if (op == "/" || op == "%")
+		{
+			string opStr;
+			if (op == "/")
+				opStr = "eax";
+			else
+				opStr = "edx";
+
+			//arg1导入eax
+			if (arg1[0] == '#' || arg1[0] == 't')
+			{
+				string varStr = findVarOrArg(arg1, argumentMap, variableMap, funcStackDeepList[currentFuncIndex]);
+				if (varStr == "")
+				{
+					cout << "[error] " + arg1 + " not found in " << i << " -> (" << op << "," << arg1 << "," << arg2 << "," << re << ")" << endl;
+				}
+				else
+				{
+					tempcode.push_back("\tmov eax, " + varStr + "\n");
+				}
+			}
+			else
+			{
+				tempcode.push_back("\tmov eax, dword " + arg1 + "\n");
+			}
+
+			//arg2导入ebx
+			if (arg2[0] == '#' || arg2[0] == 't')
+			{
+				string varStr = findVarOrArg(arg2, argumentMap, variableMap, funcStackDeepList[currentFuncIndex]);
+				if (varStr == "")
+				{
+					cout << "[error] " + arg2 + " not found in " << i << " -> (" << op << "," << arg1 << "," << arg2 << "," << re << ")" << endl;
+				}
+				else
+				{
+					tempcode.push_back("\tmov ebx, " + varStr + "\n");
+				}
+			}
+			else
+			{
+				tempcode.push_back("\tmov ebx, dword " + arg2 + "\n");
+			}
+
+			//运算
+			tempcode.push_back("\tcwd\n\tdiv ebx\n");
+
+			//处理re
+			string reStr = findVarOrArg(re, argumentMap, variableMap, funcStackDeepList[currentFuncIndex]);
+			if (reStr == "")
+			{
+				cout << "[error] " + re + " not found in (" + op + "," + arg1 + "," + arg2 + "," + re + ")" << endl;
+			}
+			else
+			{
+				tempcode.push_back("\tmov " + reStr + ", " + opStr + "\n");
+			}
+		}
+		else if (op == "&")
+		{
+			string varStr = findVarOrArg(arg1, argumentMap, variableMap, funcStackDeepList[currentFuncIndex]);
+			if (varStr == "")
+			{
+				cout << "[error] " + arg1 + " not found in " << i << " -> (" << op << "," << arg1 << "," << arg2 << "," << re << ")" << endl;
+			}
+			else
+			{
+				tempcode.push_back("\tlea eax, " + varStr + "\n");
+				string reStr = findVarOrArg(re, argumentMap, variableMap, funcStackDeepList[currentFuncIndex]);
+				if (reStr == "")
+				{
+					cout << "[error] " + re + " not found in (" + op + "," + arg1 + "," + arg2 + "," + re + ")" << endl;
+				}
+				else
+				{
+
+					tempcode.push_back("\tmov " + reStr + ", eax\n");
+				}
+			}
+		}
+		else if (op == "=")
+		{
+			string arg2Str;
+			if (arg2[0] == '#' || arg2[0] == 't')
+			{
+				arg2Str = findVarOrArg(arg2, argumentMap, variableMap, funcStackDeepList[currentFuncIndex]);
+				if (arg2Str == "")
+				{
+					cout << "[error] " + arg2 + " not found in " << i << " -> (" << op << "," << arg1 << "," << arg2 << "," << re << ")" << endl;
+				}
+				else
+				{
+					tempcode.push_back("\tmov eax, " + arg2Str + "\n");
+					arg2Str = "eax";
+				}
+			}
+			else
+			{
+				arg2Str = "dword " + arg2;
+			}
+			string arg1Str = findVarOrArg(arg1, argumentMap, variableMap, funcStackDeepList[currentFuncIndex]);
+			if (arg1Str == "")
+			{
+				cout << "[error] " + arg1 + " not found in (" + op + "," + arg1 + "," + arg2 + "," + re + ")" << endl;
+			}
+			tempcode.push_back("\tmov " + arg1Str + ", " + arg2Str + "\n");
+		}
+		else if (op == "_")
+		{
+		}
+		else if (op == "&=")
+		{
+			string arg2Str = findVarOrArg(arg2, argumentMap, variableMap, funcStackDeepList[currentFuncIndex]);
+			if (arg2Str == "")
+			{
+				cout << "[error] " + arg2 + " not found in (" + op + "," + arg1 + "," + arg2 + "," + re + ")";
+			}
+			else
+			{
+				string arg1Str = findVarOrArg(arg1, argumentMap, variableMap, funcStackDeepList[currentFuncIndex]);
+				if (arg1Str == "")
+				{
+					cout << "[error] " + arg1 + " not found in (" + op + "," + arg1 + "," + arg2 + "," + re + ")";
+				}
+				else
+				{
+					tempcode.push_back("\tmov eax, " + arg1Str + "\n");
+					tempcode.push_back("\tmov ebx, " + arg2Str + "\n");
+					tempcode.push_back("\tmov [eax], ebx\n");
+				}
+			}
+		}
+		else if (op == "||")
+		{
+			string reStr = findVarOrArg(re, argumentMap, variableMap, funcStackDeepList[currentFuncIndex]);
+			string arg1Str, arg2Str;
+			if (reStr == "")
+			{
+				cout << "[error] " + re + " not found in (" + op + "," + arg1 + "," + arg2 + "," + re + ")" << endl;
+			}
+			if (arg1[0] == 't' || arg1[0] == '#')
+			{
+				arg1Str = findVarOrArg(arg1, argumentMap, variableMap, funcStackDeepList[currentFuncIndex]);
+				if (arg1Str == "")
+				{
+					cout << "[error] " + arg1 + " not found in " << i << " -> (" << op << "," << arg1 << "," << arg2 << "," << re << ")" << endl;
+				}
+			}
+			else
+			{
+				arg1Str = "dword " + arg1;
+			}
+			if (arg2[0] == 't' || arg2[0] == '#')
+			{
+				arg2Str = findVarOrArg(arg2, argumentMap, variableMap, funcStackDeepList[currentFuncIndex]);
+				if (arg1Str == "")
+				{
+					cout << "[error] " + arg2 + " not found in " << i << " -> (" << op << "," << arg1 << "," << arg2 << "," << re << ")" << endl;
+				}
+			}
+			else
+			{
+				arg2Str = "dword " + arg2;
+			}
+
+			tempcode.push_back("\tcmp " + arg1Str + ", dword 0\n\tjnz .tempAnchor" + to_string(JMPAnchorCount) + "\n");
+			tempcode.push_back("\tcmp " + arg2Str + ", dword 0\n\tjnz .tempAnchor" + to_string(JMPAnchorCount) + "\n");
+			tempcode.push_back("\tmov " + reStr + ", dword 0\n\tjmp .tempAnchor" + to_string(JMPAnchorCount + 1) + "\n");
+			tempcode.push_back(".tempAnchor" + to_string(JMPAnchorCount) + ":\n\tmov " + reStr + ", dword 1\n.tempAnchor" + to_string(JMPAnchorCount + 1) + ":\n");
+			JMPAnchorCount += 2;
+		}
+		else if (op == "&&")
+		{
+			string reStr = findVarOrArg(re, argumentMap, variableMap, funcStackDeepList[currentFuncIndex]);
+			string arg1Str, arg2Str;
+			if (reStr == "")
+			{
+				cout << "[error] " + re + " not found in (" + op + "," + arg1 + "," + arg2 + "," + re + ")" << endl;
+			}
+			if (arg1[0] == 't' || arg1[0] == '#')
+			{
+				arg1Str = findVarOrArg(arg1, argumentMap, variableMap, funcStackDeepList[currentFuncIndex]);
+				if (arg1Str == "")
+				{
+					cout << "[error] " + arg1 + " not found in " << i << " -> (" << op << "," << arg1 << "," << arg2 << "," << re << ")" << endl;
+				}
+			}
+			else
+			{
+				arg1Str = "dword " + arg1;
+			}
+			if (arg2[0] == 't' || arg2[0] == '#')
+			{
+				arg2Str = findVarOrArg(arg2, argumentMap, variableMap, funcStackDeepList[currentFuncIndex]);
+				if (arg1Str == "")
+				{
+					cout << "[error] " + arg2 + " not found in " << i << " -> (" << op << "," << arg1 << "," << arg2 << "," << re << ")" << endl;
+				}
+			}
+			else
+			{
+				arg2Str = "dword " + arg2;
+			}
+
+			tempcode.push_back("\tcmp " + arg1Str + ", dword 0\n\tjnz .tempAnchor" + to_string(JMPAnchorCount) + "\n\tjmp .tempAnchor" + to_string(JMPAnchorCount + 1) + "\n.tempAnchor" + to_string(JMPAnchorCount) + ":\n");
+			tempcode.push_back("\tcmp " + arg2Str + ", dword 0\n\tjz .tempAnchor" + to_string(JMPAnchorCount + 1) + "\n\tmov " + reStr + ", dword 1\n\tjmp .tempAnchor" + to_string(JMPAnchorCount + 2) + "\n");
+			tempcode.push_back(".tempAnchor" + to_string(JMPAnchorCount + 1) + ":\n\tmov " + reStr + ", dword 0\n.tempAnchor" + to_string(JMPAnchorCount + 2) + ":\n");
+			JMPAnchorCount += 3;
+		}
+		else if (op == "<" || op == ">" || op == ">=" || op == "<=" || op == "==" || op == "!=")
+		{
+			string reStr = findVarOrArg(re, argumentMap, variableMap, funcStackDeepList[currentFuncIndex]);
+			string arg1Str, arg2Str;
+			if (reStr == "")
+			{
+				cout << "[error] " + re + " not found in (" + op + "," + arg1 + "," + arg2 + "," + re + ")" << endl;
+			}
+			if (arg1[0] == 't' || arg1[0] == '#')
+			{
+				arg1Str = findVarOrArg(arg1, argumentMap, variableMap, funcStackDeepList[currentFuncIndex]);
+				if (arg1Str == "")
+				{
+					cout << "[error] " + arg1 + " not found in " << i << " -> (" << op << "," << arg1 << "," << arg2 << "," << re << ")" << endl;
+				}
+			}
+			else
+			{
+				arg1Str = "dword " + arg1;
+			}
+			if (arg2[0] == 't' || arg2[0] == '#')
+			{
+				arg2Str = findVarOrArg(arg2, argumentMap, variableMap, funcStackDeepList[currentFuncIndex]);
+				if (arg1Str == "")
+				{
+					cout << "[error] " + arg2 + " not found in " << i << " -> (" << op << "," << arg1 << "," << arg2 << "," << re << ")" << endl;
+				}
+			}
+			else
+			{
+				arg2Str = "dword " + arg2;
+			}
+
+			tempcode.push_back("\tmov eax, " + arg1Str + "\n\tcmp eax, " + arg2Str + "\n");
+			if (op == ">")
+			{
+				tempcode.push_back("\tja .tempAnchor" + to_string(JMPAnchorCount) + "\n");
+			}
+			else if (op == ">=")
+			{
+				tempcode.push_back("\tjnb .tempAnchor" + to_string(JMPAnchorCount) + "\n");
+			}
+			else if (op == "<")
+			{
+				tempcode.push_back("\tjb .tempAnchor" + to_string(JMPAnchorCount) + "\n");
+			}
+			else if (op == "<=")
+			{
+				tempcode.push_back("\tjna .tempAnchor" + to_string(JMPAnchorCount) + "\n");
+			}
+			else if (op == "==")
+			{
+				tempcode.push_back("\tje .tempAnchor" + to_string(JMPAnchorCount) + "\n");
+			}
+			else if (op == "!=")
+			{
+				tempcode.push_back("\tjne .tempAnchor" + to_string(JMPAnchorCount) + "\n");
+			}
+			tempcode.push_back("\tmov " + reStr + ", dword 0\n\tjmp .tempAnchor" + to_string(JMPAnchorCount + 1) + "\n");
+			tempcode.push_back(".tempAnchor" + to_string(JMPAnchorCount) + ":\n");
+			tempcode.push_back("\tmov " + reStr + ", dword 1\n.tempAnchor" + to_string(JMPAnchorCount + 1) + ":\n");
+			JMPAnchorCount += 2;
+		}
+		else if (op == "!")
+		{
+			string reStr = findVarOrArg(re, argumentMap, variableMap, funcStackDeepList[currentFuncIndex]);
+			string arg1Str;
+			if (reStr == "")
+			{
+				cout << "[error] " + re + " not found in (" + op + "," + arg1 + "," + arg2 + "," + re + ")" << endl;
+			}
+			if (arg1[0] == 't' || arg1[0] == '#')
+			{
+				arg1Str = findVarOrArg(arg1, argumentMap, variableMap, funcStackDeepList[currentFuncIndex]);
+				if (arg1Str == "")
+				{
+					cout << "[error] " + arg1 + " not found in " << i << " -> (" << op << "," << arg1 << "," << arg2 << "," << re << ")" << endl;
+				}
+			}
+			else
+			{
+				arg1Str = "dword " + arg1;
+			}
+
+			tempcode.push_back("\tcmp " + arg1Str + ", dword 0\n");
+			tempcode.push_back("\tjz .tempAnchor" + to_string(JMPAnchorCount) + "\n\tmov " + reStr + ", dword 0\n\tjmp .tempAnchor" + to_string(JMPAnchorCount + 1) + "\n");
+			tempcode.push_back(".tempAnchor" + to_string(JMPAnchorCount) + ":\n\tmov " + reStr + ", dword 1\n.tempAnchor" + to_string(JMPAnchorCount + 1) + ":\n");
+			JMPAnchorCount += 2;
+		}
+		else if (op == "JMP")
+		{
+			int renum = stoi(re);
+			if (anchorMap.find("Anchor" + re) == anchorMap.end())
+			{
+				cout << "[error] " + re + " not found in (" + op + "," + arg1 + "," + arg2 + "," + re + ")" << endl;
+			}
+			tempcode.push_back("\tjmp .Anchor" + re + "\n");
+		}
+		else if (op == "IFNZ")
+		{
+			string arg1Str;
+			if (arg1[0] == 't' || arg1[0] == '#')
+			{
+				arg1Str = findVarOrArg(arg1, argumentMap, variableMap, funcStackDeepList[currentFuncIndex]);
+				if (arg1Str == "")
+				{
+					cout << "[error] " + arg1 + " not found in (" + op + "," + arg1 + "," + arg2 + "," + re + ")" << endl;
+				}
+			}
+			else
+			{
+				arg1Str = "dword " + arg1;
+			}
+			if (anchorMap.find("Anchor" + re) == anchorMap.end())
+			{
+				cout << "[error] " + re + " not found in (" + op + "," + arg1 + "," + arg2 + "," + re + ")" << endl;
+			}
+			tempcode.push_back("\tcmp " + arg1Str + ", dword 0\n");
+			tempcode.push_back("\tjnz .Anchor" + re + "\n");
+		}
+		else
+		{
+			tempcode.push_back("(" + op + "," + arg1 + "," + arg2 + "," + re + ")\n");
+		}
+		asmCode.push_back(tempcode);
+	}
+	if (!asmCode.empty())
+	{
+		string beginStr = "%include \"io.inc\"\n\nsection .text\n\tglobal CMAIN\n\n";
+		if (funcStackDeepList.size() == 1)
+		{
+			beginStr = "%include \"io.inc\"\n\nsection .text\n\tglobal CMAIN\nCMAIN:\n\tmov ebp, esp\n\tsub esp, " + to_string(funcStackDeepList[0]) + "\n";
+		}
+		asmCode[0].insert(asmCode[0].begin(), beginStr);
+	}
+}
+
 void showTree(Node *node)
 {
 	formIntermediateCode(root);
-	cout << "====== GRAMMER TREE ======" << endl;
-	grammerTreeDfs(root, 1);
-	cout << "====== LEX RESULT ======" << endl;
-	cout << lexRes;
-	if (!symbolTable.empty())
-		cout << "====== SYMBOL TABLE ======" << endl;
-	for (int i = 0; i < symbolTable.size(); i++)
-	{
-		if (symbolTable[i]->type == SYM_INT_STAR_t)
-			cout << "INT* ";
-		else if (symbolTable[i]->type == SYM_INT_t)
-			cout << "INT ";
-		cout << symbolTable[i]->id << "     " << (long long)symbolTable[i] << endl;
-	}
-	if (!funcNodes.empty())
-		cout << "====== FUNCTIONS ======" << endl;
-	for (int i = 0; i < funcNodes.size(); i++)
-		cout << funcNodes[i]->id << "     " << (long long)funcNodes[i] << endl;
 	cout << "====== IntermediateCode ======" << endl;
 	for (int i = 0; i < intermediate.size(); i++)
 	{
@@ -1077,6 +1810,27 @@ void showTree(Node *node)
 		{
 			cout << line << " " << i + 1 << " (" + intermediate[i][0] + "," + intermediate[i][1] + "," + intermediate[i][2] + "," + intermediate[i][3] + ")" << endl;
 			line++;
+		}
+	}
+	formAsmCode();
+	cout << "====== AsmCode readable======" << endl;
+	line = 1;
+	for (int i = 0; i < asmCode.size(); ++i)
+	{
+		cout << "line:" << line << "====>\n";
+		line++;
+		for (int j = 0; j < asmCode[i].size(); ++j)
+		{
+			cout << asmCode[i][j];
+		}
+		cout << endl;
+	}
+	cout << "==== AsmCode ====" << endl;
+	for (int i = 0; i < asmCode.size(); ++i)
+	{
+		for (int j = 0; j < asmCode[i].size(); ++j)
+		{
+			cout << asmCode[i][j];
 		}
 	}
 }
