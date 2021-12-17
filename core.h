@@ -1796,11 +1796,24 @@ void formAsmCode()
 void showTree(Node *node)
 {
 	formIntermediateCode(root);
-	cout << "====== IntermediateCode ======" << endl;
-	for (int i = 0; i < intermediate.size(); i++)
+	cout << "====== GRAMMER TREE ======" << endl;
+	grammerTreeDfs(root, 1);
+	cout << "====== LEX RESULT ======" << endl;
+	cout << lexRes;
+	if (!symbolTable.empty())
+		cout << "====== SYMBOL TABLE ======" << endl;
+	for (int i = 0; i < symbolTable.size(); i++)
 	{
-		cout << i + 1 << " (" + intermediate[i][0] + "," + intermediate[i][1] + "," + intermediate[i][2] + "," + intermediate[i][3] + ")" << endl;
+		if (symbolTable[i]->type == SYM_INT_STAR_t)
+			cout << "INT* ";
+		else if (symbolTable[i]->type == SYM_INT_t)
+			cout << "INT ";
+		cout << symbolTable[i]->id << "     " << (long long)symbolTable[i] << endl;
 	}
+	if (!funcNodes.empty())
+		cout << "====== FUNCTIONS ======" << endl;
+	for (int i = 0; i < funcNodes.size(); i++)
+		cout << funcNodes[i]->id << "     " << (long long)funcNodes[i] << endl;
 	IntermediateOptimize();
 	cout << "====== Optimized IntermediateCode ======" << endl;
 	int line = 1;
@@ -1813,7 +1826,7 @@ void showTree(Node *node)
 		}
 	}
 	formAsmCode();
-	cout << "====== AsmCode readable======" << endl;
+	cout << "====== AsmCode readable ======" << endl;
 	line = 1;
 	for (int i = 0; i < asmCode.size(); ++i)
 	{
