@@ -222,17 +222,17 @@ LBS
 RBS
 LP
 INT
-ID m 5811262128
+ID m 105553172365600
 SEMI
 INT
-ID kdwada 5811262512
+ID kdwada 105553172365696
 OP_ASSIGN
 NUMBER 1
 SEMI
 INT
-ID n 5811262784
+ID n 105553172365888
 SEMI
-ID m 5811262128
+ID m 105553172365600
 OP_ASSIGN
 NUMBER 2
 SEMI
@@ -240,18 +240,18 @@ ID scanf ~
 LBS
 COMMA
 BIT_AND
-ID m 5811262128
+ID m 105553172365600
 RBS
 SEMI
-ID n 5811262784
+ID n 105553172365888
 OP_ASSIGN
-ID m 5811262128
+ID m 105553172365600
 SEMI
 ID printf ~
 LBS
 COMMA
 LBS
-ID n 5811262784
+ID n 105553172365888
 OP_ADD
 NUMBER 100
 RBS
@@ -259,40 +259,40 @@ OP_MOD
 NUMBER 2
 RBS
 SEMI
-ID m 5811262128
+ID m 105553172365600
 OP_PP
 SEMI
 INT
-ID i 5811264304
+ID i 105553172366944
 OP_ASSIGN
 NUMBER 0
 SEMI
 INT
-ID factorial 5811264496
+ID factorial 105553172367136
 OP_ASSIGN
 NUMBER 3
 SEMI
 INT
-ID result 5811264688
+ID result 105553172367328
 OP_ASSIGN
 NUMBER 1
 SEMI
 WHILE
 LBS
-ID factorial 5811264496
+ID factorial 105553172367136
 GT
 NUMBER 0
 RBS
 LP
-ID result 5811264688
+ID result 105553172367328
 OP_ASSIGN
-ID result 5811264688
+ID result 105553172367328
 OP_MUL
-ID factorial 5811264496
+ID factorial 105553172367136
 SEMI
-ID factorial 5811264496
+ID factorial 105553172367136
 OP_ASSIGN
-ID factorial 5811264496
+ID factorial 105553172367136
 OP_SUB
 NUMBER 1
 SEMI
@@ -300,87 +300,87 @@ RP
 ID printf ~
 LBS
 COMMA
-ID result 5811264688
+ID result 105553172367328
 OP_MOD
 NUMBER 100
 OP_SUB
 NUMBER 1
 RBS
 SEMI
-ID i 5811264304
+ID i 105553172366944
 OP_PP
 SEMI
 FOR
 LBS
 INT
-ID j 5811266608
+ID j 105553172368864
 OP_ASSIGN
 NUMBER 0
 SEMI
-ID result 5811264688
+ID result 105553172367328
 OP_MOD
 NUMBER 100
 OP_SUB
 NUMBER 1
 SEMI
-ID j 5811266608
+ID j 105553172368864
 OP_PP
 RBS
 LP
 FOR
 LBS
 INT
-ID k 5811265168
+ID k 105553172369440
 OP_ASSIGN
-ID j 5811266608
+ID j 105553172368864
 OP_ADD
 NUMBER 1
 SEMI
-ID k 5811265168
+ID k 105553172369440
 LT
-ID result 5811264688
+ID result 105553172367328
 OP_MOD
 NUMBER 100
 OP_SUB
 NUMBER 1
 SEMI
 OP_PP
-ID k 5811265168
+ID k 105553172369440
 RBS
 LP
 IF
 LBS
-ID k 5811265168
+ID k 105553172369440
 OP_SUB
 NUMBER 5
 EQ
-ID j 5811266608
+ID j 105553172368864
 OR
 NOT
-ID j 5811266608
+ID j 105553172368864
 OP_ADD
 NUMBER 2
 EQ
-ID k 5811265168
+ID k 105553172369440
 AND
-ID k 5811265168
+ID k 105553172369440
 OP_SUB
 NUMBER 3
 EQ
-ID j 5811266608
+ID j 105553172368864
 RBS
 LP
 INT
-ID i 5811268240
+ID i 105553172371264
 OP_ASSIGN
 NUMBER 0
 SEMI
-ID i 5811268240
+ID i 105553172371264
 OP_ASSIGN
-ID k 5811265168
+ID k 105553172369440
 OP_MOD
 LBS
-ID j 5811266608
+ID j 105553172368864
 OP_ADD
 NUMBER 1
 RBS
@@ -388,32 +388,32 @@ SEMI
 ID printf ~
 LBS
 COMMA
-ID i 5811268240
+ID i 105553172371264
 RBS
 SEMI
 RP
 ELSE
 IF
 LBS
-ID k 5811265168
+ID k 105553172369440
 EQ
-ID j 5811266608
+ID j 105553172368864
 OP_ADD
 NUMBER 3
 AND
-ID k 5811265168
+ID k 105553172369440
 OP_MOD
 NUMBER 2
 EQ
 NUMBER 0
 RBS
 LP
-ID i 5811264304
+ID i 105553172366944
 OP_ASSIGN
-ID k 5811265168
+ID k 105553172369440
 OP_DIV
 LBS
-ID j 5811266608
+ID j 105553172368864
 OP_ADD
 NUMBER 1
 RBS
@@ -421,7 +421,7 @@ SEMI
 ID printf ~
 LBS
 COMMA
-ID i 5811264304
+ID i 105553172366944
 RBS
 SEMI
 RP
@@ -430,7 +430,7 @@ LP
 ID printf ~
 LBS
 COMMA
-ID i 5811264304
+ID i 105553172366944
 RBS
 SEMI
 RP
@@ -441,167 +441,822 @@ NUMBER 0
 SEMI
 RP
 ====== SYMBOL TABLE ======
-INT i     5811268240
-INT k     5811265168
-INT j     5811266608
-INT result     5811264688
-INT factorial     5811264496
-INT i     5811264304
-INT n     5811262784
-INT kdwada     5811262512
-INT m     5811262128
-====== IntermediateCode ======
-1 (=,#5811262512,1,_)
-2 (=,#5811262128,2,_)
-3 (&,#5811262128,_,temp0)
-4 (CALL,scanf,{"%d",temp0,},temp1)
-5 (=,#5811262784,#5811262128,_)
-6 (+,#5811262784,100,temp2)
-7 (%,temp2,2,temp3)
-8 (CALL,printf,{"%d\n",temp3,},temp4)
-9 (+,#5811262128,0,temp5)
-10 (+,#5811262128,1,temp6)
-11 (=,#5811262128,temp6,_)
-12 (=,#5811264304,0,_)
-13 (=,#5811264496,3,_)
-14 (=,#5811264688,1,_)
-15 (>,#5811264496,0,temp7)
-16 (IFNZ,temp7,_,18)
-17 (JMP,_,_,23)
-18 (*,#5811264688,#5811264496,temp8)
-19 (=,#5811264688,temp8,_)
-20 (-,#5811264496,1,temp9)
-21 (=,#5811264496,temp9,_)
-22 (JMP,_,_,15)
-23 (%,#5811264688,100,temp10)
-24 (-,temp10,1,temp11)
-25 (CALL,printf,{"%d\n",temp11,},temp12)
-26 (+,#5811264304,0,temp13)
-27 (+,#5811264304,1,temp14)
-28 (=,#5811264304,temp14,_)
-29 (=,#5811266608,0,_)
-30 (%,#5811264688,100,temp15)
-31 (-,temp15,1,temp16)
-32 (IFNZ,temp16,_,34)
-33 (JMP,_,_,79)
-34 (+,#5811266608,1,temp17)
-35 (=,#5811265168,temp17,_)
-36 (%,#5811264688,100,temp18)
-37 (-,temp18,1,temp19)
-38 (<,#5811265168,temp19,temp20)
-39 (IFNZ,temp20,_,41)
-40 (JMP,_,_,75)
-41 (-,#5811265168,5,temp21)
-42 (==,temp21,#5811266608,temp22)
-43 (!,#5811266608,_,temp23)
-44 (+,temp23,2,temp24)
-45 (==,temp24,#5811265168,temp25)
-46 (-,#5811265168,3,temp26)
-47 (==,temp26,#5811266608,temp27)
-48 (&&,temp25,temp27,temp28)
-49 (||,temp22,temp28,temp29)
-50 (IFNZ,temp29,_,52)
-51 (JMP,_,_,58)
-52 (=,#5811268240,0,_)
-53 (+,#5811266608,1,temp30)
-54 (%,#5811265168,temp30,temp31)
-55 (=,#5811268240,temp31,_)
-56 (CALL,printf,{"1: %d\n",#5811268240,},temp32)
-57 (JMP,_,_,71)
-58 (+,#5811266608,3,temp33)
-59 (==,#5811265168,temp33,temp34)
-60 (%,#5811265168,2,temp35)
-61 (==,temp35,0,temp36)
-62 (&&,temp34,temp36,temp37)
-63 (IFNZ,temp37,_,65)
-64 (JMP,_,_,70)
-65 (+,#5811266608,1,temp38)
-66 (/,#5811265168,temp38,temp39)
-67 (=,#5811264304,temp39,_)
-68 (CALL,printf,{"2: %d\n",#5811264304,},temp40)
-69 (JMP,_,_,71)
-70 (CALL,printf,{"3: %d\n",#5811264304,},temp41)
-71 (+,#5811265168,1,temp43)
-72 (=,#5811265168,temp43,_)
-73 (+,#5811265168,1,temp42)
-74 (JMP,_,_,36)
-75 (+,#5811266608,0,temp44)
-76 (+,#5811266608,1,temp45)
-77 (=,#5811266608,temp45,_)
-78 (JMP,_,_,30)
-79 (RET,0,_,_)
+INT i     105553172371264
+INT k     105553172369440
+INT j     105553172368864
+INT result     105553172367328
+INT factorial     105553172367136
+INT i     105553172366944
+INT n     105553172365888
+INT kdwada     105553172365696
+INT m     105553172365600
 ====== Optimized IntermediateCode ======
-1 2 (=,#5811262128,2,_)
-2 3 (&,#5811262128,_,temp0)
+1 2 (=,#105553172365600,2,_)
+2 3 (&,#105553172365600,_,temp0)
 3 4 (CALL,scanf,{"%d",temp0,},temp1)
-4 5 (=,#5811262784,#5811262128,_)
-5 6 (+,#5811262784,100,temp2)
+4 5 (=,#105553172365888,#105553172365600,_)
+5 6 (+,#105553172365888,100,temp2)
 6 7 (%,temp2,2,temp3)
 7 8 (CALL,printf,{"%d\n",temp3,},temp4)
-8 10 (+,#5811262128,1,temp6)
-9 11 (=,#5811262128,temp6,_)
-10 12 (=,#5811264304,0,_)
-11 13 (=,#5811264496,3,_)
-12 14 (=,#5811264688,1,_)
-13 15 (>,#5811264496,0,temp7)
+8 10 (+,#105553172365600,1,temp6)
+9 11 (=,#105553172365600,temp6,_)
+10 12 (=,#105553172366944,0,_)
+11 13 (=,#105553172367136,3,_)
+12 14 (=,#105553172367328,1,_)
+13 15 (>,#105553172367136,0,temp7)
 14 16 (IFNZ,temp7,_,18)
 15 17 (JMP,_,_,23)
-16 18 (*,#5811264688,#5811264496,temp8)
-17 19 (=,#5811264688,temp8,_)
-18 20 (-,#5811264496,1,temp9)
-19 21 (=,#5811264496,temp9,_)
+16 18 (*,#105553172367328,#105553172367136,temp8)
+17 19 (=,#105553172367328,temp8,_)
+18 20 (-,#105553172367136,1,temp9)
+19 21 (=,#105553172367136,temp9,_)
 20 22 (JMP,_,_,15)
-21 23 (%,#5811264688,100,temp10)
+21 23 (%,#105553172367328,100,temp10)
 22 24 (-,temp10,1,temp11)
 23 25 (CALL,printf,{"%d\n",temp11,},temp12)
-24 27 (+,#5811264304,1,temp14)
-25 28 (=,#5811264304,temp14,_)
-26 29 (=,#5811266608,0,_)
-27 30 (%,#5811264688,100,temp15)
+24 27 (+,#105553172366944,1,temp14)
+25 28 (=,#105553172366944,temp14,_)
+26 29 (=,#105553172368864,0,_)
+27 30 (%,#105553172367328,100,temp15)
 28 31 (-,temp15,1,temp16)
 29 32 (IFNZ,temp16,_,34)
 30 33 (JMP,_,_,79)
-31 34 (+,#5811266608,1,temp17)
-32 35 (=,#5811265168,temp17,_)
-33 36 (%,#5811264688,100,temp18)
+31 34 (+,#105553172368864,1,temp17)
+32 35 (=,#105553172369440,temp17,_)
+33 36 (%,#105553172367328,100,temp18)
 34 37 (-,temp18,1,temp19)
-35 38 (<,#5811265168,temp19,temp20)
+35 38 (<,#105553172369440,temp19,temp20)
 36 39 (IFNZ,temp20,_,41)
 37 40 (JMP,_,_,75)
-38 41 (-,#5811265168,5,temp21)
-39 42 (==,temp21,#5811266608,temp22)
-40 43 (!,#5811266608,_,temp23)
+38 41 (-,#105553172369440,5,temp21)
+39 42 (==,temp21,#105553172368864,temp22)
+40 43 (!,#105553172368864,_,temp23)
 41 44 (+,temp23,2,temp24)
-42 45 (==,temp24,#5811265168,temp25)
-43 46 (-,#5811265168,3,temp26)
-44 47 (==,temp26,#5811266608,temp27)
+42 45 (==,temp24,#105553172369440,temp25)
+43 46 (-,#105553172369440,3,temp26)
+44 47 (==,temp26,#105553172368864,temp27)
 45 48 (&&,temp25,temp27,temp28)
 46 49 (||,temp22,temp28,temp29)
 47 50 (IFNZ,temp29,_,52)
 48 51 (JMP,_,_,58)
-49 52 (=,#5811268240,0,_)
-50 53 (+,#5811266608,1,temp30)
-51 54 (%,#5811265168,temp30,temp31)
-52 55 (=,#5811268240,temp31,_)
-53 56 (CALL,printf,{"1: %d\n",#5811268240,},temp32)
+49 52 (=,#105553172371264,0,_)
+50 53 (+,#105553172368864,1,temp30)
+51 54 (%,#105553172369440,temp30,temp31)
+52 55 (=,#105553172371264,temp31,_)
+53 56 (CALL,printf,{"1: %d\n",#105553172371264,},temp32)
 54 57 (JMP,_,_,71)
-55 58 (+,#5811266608,3,temp33)
-56 59 (==,#5811265168,temp33,temp34)
-57 60 (%,#5811265168,2,temp35)
+55 58 (+,#105553172368864,3,temp33)
+56 59 (==,#105553172369440,temp33,temp34)
+57 60 (%,#105553172369440,2,temp35)
 58 61 (==,temp35,0,temp36)
 59 62 (&&,temp34,temp36,temp37)
 60 63 (IFNZ,temp37,_,65)
 61 64 (JMP,_,_,70)
-62 65 (+,#5811266608,1,temp38)
-63 66 (/,#5811265168,temp38,temp39)
-64 67 (=,#5811264304,temp39,_)
-65 68 (CALL,printf,{"2: %d\n",#5811264304,},temp40)
+62 65 (+,#105553172368864,1,temp38)
+63 66 (/,#105553172369440,temp38,temp39)
+64 67 (=,#105553172366944,temp39,_)
+65 68 (CALL,printf,{"2: %d\n",#105553172366944,},temp40)
 66 69 (JMP,_,_,71)
-67 70 (CALL,printf,{"3: %d\n",#5811264304,},temp41)
-68 71 (+,#5811265168,1,temp43)
-69 72 (=,#5811265168,temp43,_)
+67 70 (CALL,printf,{"3: %d\n",#105553172366944,},temp41)
+68 71 (+,#105553172369440,1,temp43)
+69 72 (=,#105553172369440,temp43,_)
 70 74 (JMP,_,_,36)
-71 76 (+,#5811266608,1,temp45)
-72 77 (=,#5811266608,temp45,_)
+71 76 (+,#105553172368864,1,temp45)
+72 77 (=,#105553172368864,temp45,_)
 73 78 (JMP,_,_,30)
 74 79 (RET,0,_,_)
+"%d" not found in (CALL<scanf<{"%d",temp0,},temp1)
+====== AsmCode readable ======
+line:1====>
+%include "io.inc"
+
+section .text
+	global CMAIN
+CMAIN:
+	mov ebp, esp
+	sub esp, 216
+
+line:2====>
+	mov [esp+212], dword 2
+
+line:3====>
+	lea eax, [esp+212]
+	mov [esp+208], eax
+
+line:4====>
+	GET_DEC 4, eax
+	mov ebx, [esp+208]
+	mov [ebx], eax
+
+line:5====>
+	mov eax, [esp+212]
+	mov [esp+200], eax
+
+line:6====>
+	mov eax, [esp+200]
+	mov ebx, dword 100
+	add eax, ebx
+	mov [esp+196], eax
+
+line:7====>
+	mov eax, [esp+196]
+	mov ebx, dword 2
+	cwd
+	div ebx
+	mov [esp+192], edx
+
+line:8====>
+	PRINT_STRING ``
+	PRINT_DEC 4,[esp+192]
+	PRINT_STRING `\n`
+
+line:9====>
+
+line:10====>
+	mov eax, [esp+212]
+	mov ebx, dword 1
+	add eax, ebx
+	mov [esp+180], eax
+
+line:11====>
+	mov eax, [esp+180]
+	mov [esp+212], eax
+
+line:12====>
+	mov [esp+176], dword 0
+
+line:13====>
+	mov [esp+172], dword 3
+
+line:14====>
+	mov [esp+168], dword 1
+
+line:15====>
+.Anchor15:
+	mov eax, [esp+172]
+	cmp eax, dword 0
+	ja .tempAnchor0
+	mov [esp+164], dword 0
+	jmp .tempAnchor1
+.tempAnchor0:
+	mov [esp+164], dword 1
+.tempAnchor1:
+
+line:16====>
+	cmp [esp+164], dword 0
+	jnz .Anchor18
+
+line:17====>
+	jmp .Anchor23
+
+line:18====>
+.Anchor18:
+	mov eax, [esp+168]
+	mov ebx, [esp+172]
+	imul eax, ebx
+	mov [esp+160], eax
+
+line:19====>
+	mov eax, [esp+160]
+	mov [esp+168], eax
+
+line:20====>
+	mov eax, [esp+172]
+	mov ebx, dword 1
+	sub eax, ebx
+	mov [esp+156], eax
+
+line:21====>
+	mov eax, [esp+156]
+	mov [esp+172], eax
+
+line:22====>
+	jmp .Anchor15
+
+line:23====>
+.Anchor23:
+	mov eax, [esp+168]
+	mov ebx, dword 100
+	cwd
+	div ebx
+	mov [esp+152], edx
+
+line:24====>
+	mov eax, [esp+152]
+	mov ebx, dword 1
+	sub eax, ebx
+	mov [esp+148], eax
+
+line:25====>
+	PRINT_STRING ``
+	PRINT_DEC 4,[esp+148]
+	PRINT_STRING `\n`
+
+line:26====>
+
+line:27====>
+	mov eax, [esp+176]
+	mov ebx, dword 1
+	add eax, ebx
+	mov [esp+136], eax
+
+line:28====>
+	mov eax, [esp+136]
+	mov [esp+176], eax
+
+line:29====>
+	mov [esp+132], dword 0
+
+line:30====>
+.Anchor30:
+	mov eax, [esp+168]
+	mov ebx, dword 100
+	cwd
+	div ebx
+	mov [esp+128], edx
+
+line:31====>
+	mov eax, [esp+128]
+	mov ebx, dword 1
+	sub eax, ebx
+	mov [esp+124], eax
+
+line:32====>
+	cmp [esp+124], dword 0
+	jnz .Anchor34
+
+line:33====>
+	jmp .Anchor79
+
+line:34====>
+.Anchor34:
+	mov eax, [esp+132]
+	mov ebx, dword 1
+	add eax, ebx
+	mov [esp+120], eax
+
+line:35====>
+	mov eax, [esp+120]
+	mov [esp+116], eax
+
+line:36====>
+.Anchor36:
+	mov eax, [esp+168]
+	mov ebx, dword 100
+	cwd
+	div ebx
+	mov [esp+112], edx
+
+line:37====>
+	mov eax, [esp+112]
+	mov ebx, dword 1
+	sub eax, ebx
+	mov [esp+108], eax
+
+line:38====>
+	mov eax, [esp+116]
+	cmp eax, [esp+108]
+	jb .tempAnchor2
+	mov [esp+104], dword 0
+	jmp .tempAnchor3
+.tempAnchor2:
+	mov [esp+104], dword 1
+.tempAnchor3:
+
+line:39====>
+	cmp [esp+104], dword 0
+	jnz .Anchor41
+
+line:40====>
+	jmp .Anchor75
+
+line:41====>
+.Anchor41:
+	mov eax, [esp+116]
+	mov ebx, dword 5
+	sub eax, ebx
+	mov [esp+100], eax
+
+line:42====>
+	mov eax, [esp+100]
+	cmp eax, [esp+132]
+	je .tempAnchor4
+	mov [esp+96], dword 0
+	jmp .tempAnchor5
+.tempAnchor4:
+	mov [esp+96], dword 1
+.tempAnchor5:
+
+line:43====>
+	cmp [esp+132], dword 0
+	jz .tempAnchor6
+	mov [esp+92], dword 0
+	jmp .tempAnchor7
+.tempAnchor6:
+	mov [esp+92], dword 1
+.tempAnchor7:
+
+line:44====>
+	mov eax, [esp+92]
+	mov ebx, dword 2
+	add eax, ebx
+	mov [esp+88], eax
+
+line:45====>
+	mov eax, [esp+88]
+	cmp eax, [esp+116]
+	je .tempAnchor8
+	mov [esp+84], dword 0
+	jmp .tempAnchor9
+.tempAnchor8:
+	mov [esp+84], dword 1
+.tempAnchor9:
+
+line:46====>
+	mov eax, [esp+116]
+	mov ebx, dword 3
+	sub eax, ebx
+	mov [esp+80], eax
+
+line:47====>
+	mov eax, [esp+80]
+	cmp eax, [esp+132]
+	je .tempAnchor10
+	mov [esp+76], dword 0
+	jmp .tempAnchor11
+.tempAnchor10:
+	mov [esp+76], dword 1
+.tempAnchor11:
+
+line:48====>
+	cmp [esp+84], dword 0
+	jnz .tempAnchor12
+	jmp .tempAnchor13
+.tempAnchor12:
+	cmp [esp+76], dword 0
+	jz .tempAnchor13
+	mov [esp+72], dword 1
+	jmp .tempAnchor14
+.tempAnchor13:
+	mov [esp+72], dword 0
+.tempAnchor14:
+
+line:49====>
+	cmp [esp+96], dword 0
+	jnz .tempAnchor15
+	cmp [esp+72], dword 0
+	jnz .tempAnchor15
+	mov [esp+68], dword 0
+	jmp .tempAnchor16
+.tempAnchor15:
+	mov [esp+68], dword 1
+.tempAnchor16:
+
+line:50====>
+	cmp [esp+68], dword 0
+	jnz .Anchor52
+
+line:51====>
+	jmp .Anchor58
+
+line:52====>
+.Anchor52:
+	mov [esp+64], dword 0
+
+line:53====>
+	mov eax, [esp+132]
+	mov ebx, dword 1
+	add eax, ebx
+	mov [esp+60], eax
+
+line:54====>
+	mov eax, [esp+116]
+	mov ebx, [esp+60]
+	cwd
+	div ebx
+	mov [esp+56], edx
+
+line:55====>
+	mov eax, [esp+56]
+	mov [esp+64], eax
+
+line:56====>
+	PRINT_STRING `1: `
+	PRINT_DEC 4,[esp+64]
+	PRINT_STRING `\n`
+
+line:57====>
+	jmp .Anchor71
+
+line:58====>
+.Anchor58:
+	mov eax, [esp+132]
+	mov ebx, dword 3
+	add eax, ebx
+	mov [esp+48], eax
+
+line:59====>
+	mov eax, [esp+116]
+	cmp eax, [esp+48]
+	je .tempAnchor17
+	mov [esp+44], dword 0
+	jmp .tempAnchor18
+.tempAnchor17:
+	mov [esp+44], dword 1
+.tempAnchor18:
+
+line:60====>
+	mov eax, [esp+116]
+	mov ebx, dword 2
+	cwd
+	div ebx
+	mov [esp+40], edx
+
+line:61====>
+	mov eax, [esp+40]
+	cmp eax, dword 0
+	je .tempAnchor19
+	mov [esp+36], dword 0
+	jmp .tempAnchor20
+.tempAnchor19:
+	mov [esp+36], dword 1
+.tempAnchor20:
+
+line:62====>
+	cmp [esp+44], dword 0
+	jnz .tempAnchor21
+	jmp .tempAnchor22
+.tempAnchor21:
+	cmp [esp+36], dword 0
+	jz .tempAnchor22
+	mov [esp+32], dword 1
+	jmp .tempAnchor23
+.tempAnchor22:
+	mov [esp+32], dword 0
+.tempAnchor23:
+
+line:63====>
+	cmp [esp+32], dword 0
+	jnz .Anchor65
+
+line:64====>
+	jmp .Anchor70
+
+line:65====>
+.Anchor65:
+	mov eax, [esp+132]
+	mov ebx, dword 1
+	add eax, ebx
+	mov [esp+28], eax
+
+line:66====>
+	mov eax, [esp+116]
+	mov ebx, [esp+28]
+	cwd
+	div ebx
+	mov [esp+24], eax
+
+line:67====>
+	mov eax, [esp+24]
+	mov [esp+176], eax
+
+line:68====>
+	PRINT_STRING `2: `
+	PRINT_DEC 4,[esp+176]
+	PRINT_STRING `\n`
+
+line:69====>
+	jmp .Anchor71
+
+line:70====>
+.Anchor70:
+	PRINT_STRING `3: `
+	PRINT_DEC 4,[esp+176]
+	PRINT_STRING `\n`
+
+line:71====>
+.Anchor71:
+	mov eax, [esp+116]
+	mov ebx, dword 1
+	add eax, ebx
+	mov [esp+12], eax
+
+line:72====>
+	mov eax, [esp+12]
+	mov [esp+116], eax
+
+line:73====>
+
+line:74====>
+	jmp .Anchor36
+
+line:75====>
+.Anchor75:
+
+line:76====>
+	mov eax, [esp+132]
+	mov ebx, dword 1
+	add eax, ebx
+	mov [esp+0], eax
+
+line:77====>
+	mov eax, [esp+0]
+	mov [esp+132], eax
+
+line:78====>
+	jmp .Anchor30
+
+line:79====>
+.Anchor79:
+	mov eax, dword 0
+	add esp, 216
+	ret
+
+==== AsmCode ====
+%include "io.inc"
+
+section .text
+	global CMAIN
+CMAIN:
+	mov ebp, esp
+	sub esp, 216
+	mov [esp+212], dword 2
+	lea eax, [esp+212]
+	mov [esp+208], eax
+	GET_DEC 4, eax
+	mov ebx, [esp+208]
+	mov [ebx], eax
+	mov eax, [esp+212]
+	mov [esp+200], eax
+	mov eax, [esp+200]
+	mov ebx, dword 100
+	add eax, ebx
+	mov [esp+196], eax
+	mov eax, [esp+196]
+	mov ebx, dword 2
+	cwd
+	div ebx
+	mov [esp+192], edx
+	PRINT_STRING ``
+	PRINT_DEC 4,[esp+192]
+	PRINT_STRING `\n`
+	mov eax, [esp+212]
+	mov ebx, dword 1
+	add eax, ebx
+	mov [esp+180], eax
+	mov eax, [esp+180]
+	mov [esp+212], eax
+	mov [esp+176], dword 0
+	mov [esp+172], dword 3
+	mov [esp+168], dword 1
+.Anchor15:
+	mov eax, [esp+172]
+	cmp eax, dword 0
+	ja .tempAnchor0
+	mov [esp+164], dword 0
+	jmp .tempAnchor1
+.tempAnchor0:
+	mov [esp+164], dword 1
+.tempAnchor1:
+	cmp [esp+164], dword 0
+	jnz .Anchor18
+	jmp .Anchor23
+.Anchor18:
+	mov eax, [esp+168]
+	mov ebx, [esp+172]
+	imul eax, ebx
+	mov [esp+160], eax
+	mov eax, [esp+160]
+	mov [esp+168], eax
+	mov eax, [esp+172]
+	mov ebx, dword 1
+	sub eax, ebx
+	mov [esp+156], eax
+	mov eax, [esp+156]
+	mov [esp+172], eax
+	jmp .Anchor15
+.Anchor23:
+	mov eax, [esp+168]
+	mov ebx, dword 100
+	cwd
+	div ebx
+	mov [esp+152], edx
+	mov eax, [esp+152]
+	mov ebx, dword 1
+	sub eax, ebx
+	mov [esp+148], eax
+	PRINT_STRING ``
+	PRINT_DEC 4,[esp+148]
+	PRINT_STRING `\n`
+	mov eax, [esp+176]
+	mov ebx, dword 1
+	add eax, ebx
+	mov [esp+136], eax
+	mov eax, [esp+136]
+	mov [esp+176], eax
+	mov [esp+132], dword 0
+.Anchor30:
+	mov eax, [esp+168]
+	mov ebx, dword 100
+	cwd
+	div ebx
+	mov [esp+128], edx
+	mov eax, [esp+128]
+	mov ebx, dword 1
+	sub eax, ebx
+	mov [esp+124], eax
+	cmp [esp+124], dword 0
+	jnz .Anchor34
+	jmp .Anchor79
+.Anchor34:
+	mov eax, [esp+132]
+	mov ebx, dword 1
+	add eax, ebx
+	mov [esp+120], eax
+	mov eax, [esp+120]
+	mov [esp+116], eax
+.Anchor36:
+	mov eax, [esp+168]
+	mov ebx, dword 100
+	cwd
+	div ebx
+	mov [esp+112], edx
+	mov eax, [esp+112]
+	mov ebx, dword 1
+	sub eax, ebx
+	mov [esp+108], eax
+	mov eax, [esp+116]
+	cmp eax, [esp+108]
+	jb .tempAnchor2
+	mov [esp+104], dword 0
+	jmp .tempAnchor3
+.tempAnchor2:
+	mov [esp+104], dword 1
+.tempAnchor3:
+	cmp [esp+104], dword 0
+	jnz .Anchor41
+	jmp .Anchor75
+.Anchor41:
+	mov eax, [esp+116]
+	mov ebx, dword 5
+	sub eax, ebx
+	mov [esp+100], eax
+	mov eax, [esp+100]
+	cmp eax, [esp+132]
+	je .tempAnchor4
+	mov [esp+96], dword 0
+	jmp .tempAnchor5
+.tempAnchor4:
+	mov [esp+96], dword 1
+.tempAnchor5:
+	cmp [esp+132], dword 0
+	jz .tempAnchor6
+	mov [esp+92], dword 0
+	jmp .tempAnchor7
+.tempAnchor6:
+	mov [esp+92], dword 1
+.tempAnchor7:
+	mov eax, [esp+92]
+	mov ebx, dword 2
+	add eax, ebx
+	mov [esp+88], eax
+	mov eax, [esp+88]
+	cmp eax, [esp+116]
+	je .tempAnchor8
+	mov [esp+84], dword 0
+	jmp .tempAnchor9
+.tempAnchor8:
+	mov [esp+84], dword 1
+.tempAnchor9:
+	mov eax, [esp+116]
+	mov ebx, dword 3
+	sub eax, ebx
+	mov [esp+80], eax
+	mov eax, [esp+80]
+	cmp eax, [esp+132]
+	je .tempAnchor10
+	mov [esp+76], dword 0
+	jmp .tempAnchor11
+.tempAnchor10:
+	mov [esp+76], dword 1
+.tempAnchor11:
+	cmp [esp+84], dword 0
+	jnz .tempAnchor12
+	jmp .tempAnchor13
+.tempAnchor12:
+	cmp [esp+76], dword 0
+	jz .tempAnchor13
+	mov [esp+72], dword 1
+	jmp .tempAnchor14
+.tempAnchor13:
+	mov [esp+72], dword 0
+.tempAnchor14:
+	cmp [esp+96], dword 0
+	jnz .tempAnchor15
+	cmp [esp+72], dword 0
+	jnz .tempAnchor15
+	mov [esp+68], dword 0
+	jmp .tempAnchor16
+.tempAnchor15:
+	mov [esp+68], dword 1
+.tempAnchor16:
+	cmp [esp+68], dword 0
+	jnz .Anchor52
+	jmp .Anchor58
+.Anchor52:
+	mov [esp+64], dword 0
+	mov eax, [esp+132]
+	mov ebx, dword 1
+	add eax, ebx
+	mov [esp+60], eax
+	mov eax, [esp+116]
+	mov ebx, [esp+60]
+	cwd
+	div ebx
+	mov [esp+56], edx
+	mov eax, [esp+56]
+	mov [esp+64], eax
+	PRINT_STRING `1: `
+	PRINT_DEC 4,[esp+64]
+	PRINT_STRING `\n`
+	jmp .Anchor71
+.Anchor58:
+	mov eax, [esp+132]
+	mov ebx, dword 3
+	add eax, ebx
+	mov [esp+48], eax
+	mov eax, [esp+116]
+	cmp eax, [esp+48]
+	je .tempAnchor17
+	mov [esp+44], dword 0
+	jmp .tempAnchor18
+.tempAnchor17:
+	mov [esp+44], dword 1
+.tempAnchor18:
+	mov eax, [esp+116]
+	mov ebx, dword 2
+	cwd
+	div ebx
+	mov [esp+40], edx
+	mov eax, [esp+40]
+	cmp eax, dword 0
+	je .tempAnchor19
+	mov [esp+36], dword 0
+	jmp .tempAnchor20
+.tempAnchor19:
+	mov [esp+36], dword 1
+.tempAnchor20:
+	cmp [esp+44], dword 0
+	jnz .tempAnchor21
+	jmp .tempAnchor22
+.tempAnchor21:
+	cmp [esp+36], dword 0
+	jz .tempAnchor22
+	mov [esp+32], dword 1
+	jmp .tempAnchor23
+.tempAnchor22:
+	mov [esp+32], dword 0
+.tempAnchor23:
+	cmp [esp+32], dword 0
+	jnz .Anchor65
+	jmp .Anchor70
+.Anchor65:
+	mov eax, [esp+132]
+	mov ebx, dword 1
+	add eax, ebx
+	mov [esp+28], eax
+	mov eax, [esp+116]
+	mov ebx, [esp+28]
+	cwd
+	div ebx
+	mov [esp+24], eax
+	mov eax, [esp+24]
+	mov [esp+176], eax
+	PRINT_STRING `2: `
+	PRINT_DEC 4,[esp+176]
+	PRINT_STRING `\n`
+	jmp .Anchor71
+.Anchor70:
+	PRINT_STRING `3: `
+	PRINT_DEC 4,[esp+176]
+	PRINT_STRING `\n`
+.Anchor71:
+	mov eax, [esp+116]
+	mov ebx, dword 1
+	add eax, ebx
+	mov [esp+12], eax
+	mov eax, [esp+12]
+	mov [esp+116], eax
+	jmp .Anchor36
+.Anchor75:
+	mov eax, [esp+132]
+	mov ebx, dword 1
+	add eax, ebx
+	mov [esp+0], eax
+	mov eax, [esp+0]
+	mov [esp+132], eax
+	jmp .Anchor30
+.Anchor79:
+	mov eax, dword 0
+	add esp, 216
+	ret

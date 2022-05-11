@@ -1,13 +1,21 @@
-int do_it(int n)
+int* do_it(int n,int x)
 {
     return n % 2;
 }
 
 int main()
 {
-    int d = 5;
-    int c = do_it(d);
-    printf("%d", do_it(5)); // should be 1
-    d = d + 1;
+    int c = 1;
+    int d = c;
+    int e = do_it(d,2);
     return 0;
 }
+
+// int main(){
+//     int total = 0;
+//     // for(int i = 0; i < 5; i++){
+//     //     total = total + i;
+//     // }
+//     // return 0;
+//     return 0;
+// }
